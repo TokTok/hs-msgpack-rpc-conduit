@@ -5,3 +5,18 @@ cache:
   directories:
     - $HOME/.cabal
     - $HOME/.ghc
+
+install:
+  - cabal install happy
+  - cabal install hpc-coveralls "aeson < 0.11"
+  - cabal install --only-dependencies --enable-tests --enable-benchmarks
+
+script:
+  - cabal configure --enable-tests --enable-benchmarks --enable-library-coverage
+  - cabal build
+  - cabal test
+
+after_script:
+  - TESTSUITE=network-msgpack-rpc-0.0.1
+  - cp dist/hpc/mix/testsuite/*.mix dist/hpc/mix/$TESTSUITE/
+  - hpc-coveralls $TESTSUITE
