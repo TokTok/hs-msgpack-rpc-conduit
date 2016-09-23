@@ -1,130 +1,43 @@
-{-# LANGUAGE DeriveDataTypeable         #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE Trustworthy                #-}
-
--------------------------------------------------------------------
--- |
--- Module    : Network.MessagePackRpc.Client
--- Copyright : (c) Hideyuki Tanaka, 2010-2015
--- License   : BSD3
---
--- Maintainer:  Hideyuki Tanaka <tanaka.hideyuki@gmail.com>
--- Stability :  experimental
--- Portability: portable
---
--- This module is client library of MessagePack-RPC.
--- The specification of MessagePack-RPC is at
--- <http://redmine.msgpack.org/projects/msgpack/wiki/RPCProtocolSpec>.
---
--- A simple example:
---
--- > import Network.MessagePackRpc.Client
--- >
--- > add :: Int -> Int -> Client Int
--- > add = call "add"
--- >
--- > main = execClient "localhost" 5000 $ do
--- >   ret <- add 123 456
--- >   liftIO $ print ret
---
---------------------------------------------------------------------
-
-module Network.MessagePack.Client
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE Trustworthy         #-}
+module Network.MessagePack.Client (
   -- * MessagePack Client type
-  ( Client
+    Client
   , execClient
+  , runClient
 
   -- * Call RPC method
   , call
 
   -- * RPC error
   , RpcError (..)
+  , RpcType (..)
   ) where
 
-import           Control.Applicative               (Applicative)
-import           Control.Exception                 (Exception)
-import           Control.Monad                     ()
-import           Control.Monad.Catch               (MonadThrow, throwM)
-import           Control.Monad.State.Strict        as CMS
-import           Data.Binary                       as Binary
-import qualified Data.ByteString                   as S
-import           Data.Conduit
-import qualified Data.Conduit.Binary               as CB
-import           Data.Conduit.Network              (appSink, appSource,
-                                                    clientSettings,
-                                                    runTCPClient)
-import           Data.Conduit.Serialization.Binary
-import           Data.MessagePack
-import qualified Data.MessagePack.Result           as R
-import           Data.Typeable                     (Typeable)
+import           Control.Applicative                 (Applicative, pure)
+import           Control.Monad                       (when)
+import           Control.Monad.Catch                 (MonadCatch, catch)
+import qualified Data.ByteString                     as S
+import           Data.Default.Class                  (Default (..))
 
-newtype Client a
-  = ClientT { runClient :: StateT Connection IO a }
-  deriving (Functor, Applicative, Monad, MonadIO, MonadThrow)
+import           Network.MessagePack.Capabilities
+import           Network.MessagePack.Client.Basic
+import qualified Network.MessagePack.Client.Internal as Internal
+import qualified Network.MessagePack.Protocol        as Protocol
 
--- | RPC connection type
-data Connection
-  = Connection
-    !(ResumableSource IO S.ByteString)
-    !(Sink S.ByteString IO ())
-    !Int
 
-execClient :: S.ByteString -> Int -> Client a -> IO ()
-execClient host port m =
-  runTCPClient (clientSettings port host) $ \ad -> do
-    (rsrc, _) <- appSource ad $$+ return ()
-    void $ evalStateT (runClient m) (Connection rsrc (appSink ad) 0)
+useDefault :: (Applicative m, Default a) => RpcError -> m a
+useDefault _ = pure def
 
--- | RPC error type
-data RpcError
-  = ServerError Object            -- ^ Server error
-  | ResultTypeError String Object -- ^ Result type mismatch
-  | ProtocolError String          -- ^ Protocol error
-  deriving (Show, Eq, Ord, Typeable)
 
-instance Exception RpcError
+initClient :: Client ()
+initClient = do
+  caps <- Protocol.capabilitiesC [CCapMethodList] `catch` useDefault
+  when (SCapMethodList `elem` caps) $ do
+    mths <- Protocol.methodListC
+    Internal.setMethodList mths
 
-class RpcType r where
-  rpcc :: String -> [Object] -> r
 
-instance MessagePack o => RpcType (Client o) where
-  rpcc name args = do
-    res <- rpcCall name (reverse args)
-    case fromObject res of
-      R.Success ok  ->
-        return ok
-      R.Failure msg ->
-        throwM $ ResultTypeError msg res
-
-instance (MessagePack o, RpcType r) => RpcType (o -> r) where
-  rpcc name args arg = rpcc name (toObject arg : args)
-
-rpcCall :: String -> [Object] -> Client Object
-rpcCall methodName args = ClientT $ do
-  Connection rsrc sink msgid <- CMS.get
-  (rsrc', res) <- lift $ do
-    CB.sourceLbs (pack (0 :: Int, msgid, methodName, args)) $$ sink
-    rsrc $$++ sinkGet Binary.get
-  CMS.put $ Connection rsrc' sink (msgid + 1)
-
-  case fromObject res of
-    Nothing -> throwM $ ProtocolError "invalid response data"
-    Just (rtype, rmsgid, rerror, rresult) -> do
-
-      when (rtype /= (1 :: Int)) $
-        throwM $ ProtocolError $
-          "invalid response type (expect 1, but got " ++ show rtype ++ "): " ++ show res
-
-      when (rmsgid /= msgid) $
-        throwM $ ProtocolError $
-          "message id mismatch: expect " ++ show msgid ++ ", but got " ++ show rmsgid
-
-      case fromObject rerror of
-        Nothing -> throwM $ ServerError rerror
-        Just () -> return rresult
-
--- | Call an RPC Method
-call :: RpcType a
-        => String -- ^ Method name
-        -> a
-call m = rpcc m []
+runClient :: S.ByteString -> Int -> Client a -> IO a
+runClient host port client =
+  execClient host port (initClient >> client)
