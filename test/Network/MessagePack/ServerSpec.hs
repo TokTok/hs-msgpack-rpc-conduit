@@ -1,36 +1,43 @@
+{-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Network.MessagePack.ServerSpec (spec) where
 
 import           Test.Hspec
 
-import           Control.Concurrent         (threadDelay)
-import           Control.Concurrent.Async   (race_)
-import           Control.Monad.Trans        (liftIO)
-import qualified Data.ByteString            as S
-import           Network                    (withSocketsDo)
+import           Control.Concurrent            (threadDelay)
+import           Control.Concurrent.Async      (race_)
+import           Control.Monad.Trans           (liftIO)
+import qualified Data.ByteString               as S
+import           Network                       (withSocketsDo)
 
-import           Network.MessagePack.Client
-import           Network.MessagePack.Server
+import           Network.MessagePack.Client    (Client, execClient, runClient)
+import           Network.MessagePack.Interface
+import qualified Network.MessagePack.Rpc       as Rpc
+import           Network.MessagePack.Server    (Method, runServer, serve)
 
 
 add :: Int -> Int -> Int
 add = (+)
 
+addI :: Interface (Int -> Int -> Returns Int)
 addC :: Int -> Int -> Client Int
-addC = call "add"
-
-addM :: Int -> Int -> Server Int
-addM x y = return $ add x y
+(addI, addC) = (interface "add", call . concrete $ addI)
 
 
-echo :: String -> String
-echo s = "***" ++ s ++ "***"
+echo :: String -> IO String
+echo s = return $ "***" ++ s ++ "***"
 
+echoI :: Interface (String -> Returns String)
 echoC :: String -> Client String
-echoC = call "echo"
+(echoI, echoC) = (interface "echo", call . concrete $ echoI)
 
-echoM :: String -> Server String
-echoM = return . echo
+
+helloR :: Rpc.Rpc IO (String -> Returns String)
+helloR = Rpc.stubs "hello" ("Hello, " ++)
+
+
+helloIOR :: Rpc.RpcIO IO (String -> Returns String)
+helloIOR = Rpc.stubsIO "helloIO" (return . ("Hello, " ++))
 
 
 port :: Int
@@ -65,12 +72,17 @@ spec = do
       runTest runClient runServer
 
 
+methods :: [Method IO]
+methods =
+  [ method addI add
+  , methodIO echoI echo
+  , Rpc.method helloR
+  , Rpc.method helloIOR
+  ]
+
+
 server :: (Int -> [Method IO] -> IO ()) -> IO ()
-server run =
-  run port
-    [ method "add" addM
-    , method "echo" echoM
-    ]
+server run = run port methods
 
 
 client
@@ -82,4 +94,8 @@ client run =
     liftIO $ r1 `shouldBe` 123 + 456
     r2 <- echoC "hello"
     liftIO $ r2 `shouldBe` "***hello***"
+    r3 <- Rpc.rpc helloR "iphy"
+    liftIO $ r3 `shouldBe` "Hello, iphy"
+    r4 <- Rpc.rpc helloIOR "iphy"
+    liftIO $ r4 `shouldBe` "Hello, iphy"
     return (r1, r2)

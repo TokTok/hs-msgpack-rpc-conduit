@@ -31,6 +31,7 @@
 module Network.MessagePack.Client.Basic (
   -- * MessagePack Client type
     Client
+  , ClientT
   , execClient
 
   -- * Call RPC method
@@ -42,7 +43,7 @@ module Network.MessagePack.Client.Basic (
   ) where
 
 import           Control.Monad.Catch                 (MonadThrow, throwM)
-import           Control.Monad.State.Strict          as CMS
+import qualified Control.Monad.State.Strict          as CMS
 import qualified Data.ByteString                     as S
 import           Data.Conduit                        (($$+))
 import           Data.Conduit.Network                (appSink, appSource,
@@ -60,7 +61,7 @@ execClient :: S.ByteString -> Int -> Client a -> IO a
 execClient host port client =
   runTCPClient (clientSettings port host) $ \ad -> do
     (rsrc, _) <- appSource ad $$+ return ()
-    evalStateT (runClient client) Connection
+    CMS.evalStateT (runClientT client) Connection
       { connSource = rsrc
       , connSink   = appSink ad
       , connMsgId  = 0
@@ -72,7 +73,8 @@ class RpcType r where
   rpcc :: String -> [Object] -> r
 
 
-instance MessagePack o => RpcType (Client o) where
+instance (CMS.MonadIO m, MonadThrow m, MessagePack o)
+    => RpcType (ClientT m o) where
   rpcc name args = do
     res <- rpcCall name (reverse args)
     case fromObject res of

@@ -2,10 +2,11 @@
 module Network.MessagePack.Client.Internal where
 
 import           Control.Applicative               (Applicative)
+import           Control.Monad                     (when)
 import           Control.Monad.Catch               (MonadCatch, MonadThrow,
                                                     throwM)
-import           Control.Monad.State.Strict        as CMS
-import           Data.Binary                       as Binary
+import qualified Control.Monad.State.Strict        as CMS
+import qualified Data.Binary                       as Binary
 import qualified Data.ByteString                   as S
 import           Data.Conduit                      (ResumableSource, Sink, ($$),
                                                     ($$++))
@@ -17,25 +18,27 @@ import           Network.MessagePack.Types
 
 
 -- | RPC connection type
-data Connection = Connection
-  { connSource :: ResumableSource IO S.ByteString
-  , connSink   :: Sink S.ByteString IO ()
+data Connection m = Connection
+  { connSource :: ResumableSource m S.ByteString
+  , connSink   :: Sink S.ByteString m ()
   , connMsgId  :: Int
   , connMths   :: [String]
   }
 
 
-newtype Client a
-  = ClientT { runClient :: StateT Connection IO a }
-  deriving (Functor, Applicative, Monad, MonadIO, MonadThrow, MonadCatch)
+newtype ClientT m a
+  = ClientT { runClientT :: CMS.StateT (Connection m) m a }
+  deriving (Functor, Applicative, Monad, CMS.MonadIO, MonadThrow, MonadCatch)
+
+type Client a = ClientT IO a
 
 
-rpcCall :: String -> [Object] -> Client Object
+rpcCall :: (MonadThrow m, CMS.MonadIO m) => String -> [Object] -> ClientT m Object
 rpcCall methodName args = ClientT $ do
   conn <- CMS.get
   let msgid = connMsgId conn
 
-  (rsrc', res) <- lift $ do
+  (rsrc', res) <- CMS.lift $ do
     let req = packRequest (connMths conn) (0, msgid, methodName, args)
     CB.sourceLbs req $$ connSink conn
     connSource conn $$++ sinkGet Binary.get
@@ -61,7 +64,7 @@ rpcCall methodName args = ClientT $ do
         Just () -> return rresult
 
 
-setMethodList :: [String] -> Client ()
+setMethodList :: Monad m => [String] -> ClientT m ()
 setMethodList mths = ClientT $ do
   conn <- CMS.get
   CMS.put conn { connMths = mths }

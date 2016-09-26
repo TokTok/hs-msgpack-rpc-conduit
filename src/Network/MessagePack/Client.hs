@@ -3,6 +3,7 @@
 module Network.MessagePack.Client (
   -- * MessagePack Client type
     Client
+  , ClientT
   , execClient
   , runClient
 
@@ -11,7 +12,7 @@ module Network.MessagePack.Client (
 
   -- * RPC error
   , RpcError (..)
-  , RpcType (..)
+  , RpcType
   ) where
 
 import           Control.Applicative                 (Applicative, pure)
