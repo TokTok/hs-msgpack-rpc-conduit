@@ -1,5 +1,5 @@
 name:                 network-msgpack-rpc
-version:              0.0.2
+version:              0.0.3
 synopsis:             A MessagePack-RPC Implementation
 homepage:             http://msgpack.org/
 license:              BSD3
