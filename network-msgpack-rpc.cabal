@@ -39,11 +39,13 @@ library
       Network.MessagePack.Client.Basic
       Network.MessagePack.Client.Internal
       Network.MessagePack.Interface.Internal
+      Network.MessagePack.Internal.TypeUtil
       Network.MessagePack.Protocol
       Network.MessagePack.Server.Basic
       Network.MessagePack.Types
   build-depends:
       base < 5
+    , MissingH
     , binary
     , binary-conduit
     , bytestring

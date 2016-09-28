@@ -10,10 +10,13 @@ import           Control.Monad.Trans           (liftIO)
 import qualified Data.ByteString               as S
 import           Network                       (withSocketsDo)
 
-import           Network.MessagePack.Client    (Client, execClient, runClient)
-import           Network.MessagePack.Interface
+import           Network.MessagePack.Client    (Client)
+import qualified Network.MessagePack.Client    as Client
+import           Network.MessagePack.Interface (Doc (..), Interface, Returns,
+                                                call, concrete, interface,
+                                                method, methodIO)
 import qualified Network.MessagePack.Rpc       as Rpc
-import           Network.MessagePack.Server    (Method, runServer, serve)
+import qualified Network.MessagePack.Server    as Server
 
 
 add :: Int -> Int -> Int
@@ -21,7 +24,7 @@ add = (+)
 
 addI :: Interface (Int -> Int -> Returns Int)
 addC :: Int -> Int -> Client Int
-(addI, addC) = (interface "add", call . concrete $ addI)
+(addI, addC) = (interface "add" (Arg "a" $ Arg "b" $ Ret "sum"), call . concrete $ addI)
 
 
 echo :: String -> IO String
@@ -29,15 +32,17 @@ echo s = return $ "***" ++ s ++ "***"
 
 echoI :: Interface (String -> Returns String)
 echoC :: String -> Client String
-(echoI, echoC) = (interface "echo", call . concrete $ echoI)
+(echoI, echoC) = (interface "echo" (Arg "input" $ Ret "output"), call . concrete $ echoI)
 
 
 helloR :: Rpc.Rpc IO (String -> Returns String)
-helloR = Rpc.stubs "hello" ("Hello, " ++)
+helloR = Rpc.stubs "hello" (Arg "name" $ Ret "hello")
+  ("Hello, " ++)
 
 
 helloIOR :: Rpc.RpcIO IO (String -> Returns String)
-helloIOR = Rpc.stubsIO "helloIO" (return . ("Hello, " ++))
+helloIOR = Rpc.stubsIO "helloIO" (Arg "name" $ Ret "hello") $
+  return . ("Hello, " ++)
 
 
 port :: Int
@@ -46,7 +51,7 @@ port = 5000
 
 runTest
   :: (S.ByteString -> Int -> Client (Int, String) -> IO (Int, String))
-  -> (Int -> [Method IO] -> IO ())
+  -> (Int -> [Server.Method IO] -> IO ())
   -> IO ()
 runTest runC runS = withSocketsDo $
   server runS `race_` do
@@ -59,20 +64,39 @@ spec :: Spec
 spec = do
   describe "simple client" $ do
     it "can communicate with simple server" $
-      runTest execClient serve
+      runTest Client.execClient Server.serve
 
     it "can communicate with advanced server" $
-      runTest execClient runServer
+      runTest Client.execClient Server.runServer
 
   describe "advanced client" $ do
     it "can communicate with simple server" $
-      runTest runClient serve
+      runTest Client.runClient Server.serve
 
     it "can communicate with advanced server" $
-      runTest runClient runServer
+      runTest Client.runClient Server.runServer
+
+  describe "documentation" $ do
+    it "is type-safe" $
+      Rpc.docs helloR `shouldBe` ("hello", Arg "name" $ Ret "hello")
+
+    it "can be retrieved from type-erased methods" $ do
+      let docs = map Server.methodDocs methods
+      length docs `shouldNotBe` 0
+      mapM_ (\mdoc -> do
+          let args = Server.methodArgs mdoc
+          let retv = Server.methodRetv mdoc
+          length args `shouldNotBe` 0
+          mapM_ (\arg -> do
+              Server.valName arg `shouldNotBe` ""
+              Server.valType arg `shouldNotBe` ""
+            ) args
+          Server.valName retv `shouldNotBe` ""
+          Server.valType retv `shouldNotBe` ""
+        ) docs
 
 
-methods :: [Method IO]
+methods :: [Server.Method IO]
 methods =
   [ method addI add
   , methodIO echoI echo
@@ -81,7 +105,7 @@ methods =
   ]
 
 
-server :: (Int -> [Method IO] -> IO ()) -> IO ()
+server :: (Int -> [Server.Method IO] -> IO ()) -> IO ()
 server run = run port methods
 
 

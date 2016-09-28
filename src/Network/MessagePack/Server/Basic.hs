@@ -34,6 +34,8 @@
 module Network.MessagePack.Server.Basic (
   -- * RPC method types
     Method
+  , MethodVal (..)
+  , MethodDocs (..)
   , MethodType (..)
   , ServerT (..)
   , Server
@@ -43,6 +45,7 @@ module Network.MessagePack.Server.Basic (
 
   -- * Get the method name
   , methodName
+  , methodDocs
 
   -- * Start RPC server
   , serve
@@ -74,9 +77,22 @@ import           Network.Socket                    (SocketOption (ReuseAddr),
 
 import           Network.MessagePack.Types
 
+data MethodVal = MethodVal
+  { valName :: String
+  , valType :: String
+  }
+  deriving (Show)
+
+data MethodDocs = MethodDocs
+  { methodArgs :: [MethodVal]
+  , methodRetv :: MethodVal
+  }
+  deriving (Show)
+
 -- ^ MessagePack RPC method
 data Method m = Method
   { methodName :: String
+  , methodDocs :: MethodDocs
   , methodBody :: [Object] -> m Object
   }
 
@@ -116,9 +132,10 @@ instance (MonadThrow m, MessagePack o, MethodType m r) => MethodType m (o -> r) 
 method
   :: MethodType m f
   => String   -- ^ Method name
+  -> MethodDocs
   -> f        -- ^ Method body
   -> Method m
-method name body = Method name $ toBody name body
+method name docs body = Method name docs $ toBody name body
 
 
 processRequests

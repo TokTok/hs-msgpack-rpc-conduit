@@ -4,11 +4,15 @@ module Network.MessagePack.Server (
   -- * RPC method types
     Method
   , MethodType (..)
+  , MethodDocs (..)
+  , MethodVal (..)
   , ServerT (..)
   , Server
 
   -- * Build a method
   , method
+  , methodName
+  , methodDocs
 
   -- * Start RPC server
   , serve

@@ -44,6 +44,8 @@ protocolMethods
   => [Method m]
   -> [Method m]
 protocolMethods methods = methods ++
-  [ method capabilitiesN (capabilitiesS methods)
-  , method methodListN   (methodListS   methods)
+  [ method capabilitiesN (MethodDocs [MethodVal "clientCaps" "ClientCapability"] (MethodVal "serverCaps" "ServerCapability"))
+      (capabilitiesS methods)
+  , method methodListN   (MethodDocs [] (MethodVal "names" "[String]"))
+      (methodListS   methods)
   ]
