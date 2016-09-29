@@ -35,12 +35,12 @@ echoC :: String -> Client String
 (echoI, echoC) = (interface "echo" (Arg "input" $ Ret "output"), call . concrete $ echoI)
 
 
-helloR :: Rpc.Rpc IO (String -> Returns String)
+helloR :: Rpc.Rpc (String -> Returns String)
 helloR = Rpc.stubs "hello" (Arg "name" $ Ret "hello")
   ("Hello, " ++)
 
 
-helloIOR :: Rpc.RpcIO IO (String -> Returns String)
+helloIOR :: Rpc.RpcIO (String -> Returns String)
 helloIOR = Rpc.stubsIO "helloIO" (Arg "name" $ Ret "hello") $
   return . ("Hello, " ++)
 
