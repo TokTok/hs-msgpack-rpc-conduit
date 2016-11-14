@@ -43,6 +43,10 @@ library
       Network.MessagePack.Protocol
       Network.MessagePack.Server.Basic
       Network.MessagePack.Types
+      Network.MessagePack.Types.Client
+      Network.MessagePack.Types.Error
+      Network.MessagePack.Types.Server
+      Network.MessagePack.Types.Spec
   build-depends:
       base < 5
     , MissingH

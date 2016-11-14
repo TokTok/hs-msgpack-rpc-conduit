@@ -15,9 +15,9 @@ module Network.MessagePack.Rpc
 import           Control.Monad.Catch                    (MonadThrow)
 import           Data.Text                              (Text)
 
-import qualified Network.MessagePack.Client             as Client
 import qualified Network.MessagePack.Interface.Internal as I
-import qualified Network.MessagePack.Server             as Server
+import qualified Network.MessagePack.Types.Client       as Client
+import qualified Network.MessagePack.Types.Server       as Server
 
 
 class RpcService rpc where
@@ -49,8 +49,11 @@ instance RpcService (RpcT mc ms f) where
   type ServerMonad (RpcT mc ms f) = ms
   type F (RpcT mc ms f) = f
   rpc    = rpcPure
+  {-# INLINE rpc #-}
   method = methodPure
+  {-# INLINE method #-}
   docs r = (Server.methodName $ method r, I.docs $ intfPure r)
+  {-# INLINE docs #-}
 
 
 stubs
@@ -88,8 +91,11 @@ instance RpcService (RpcIOT mc ms f) where
   type ServerMonad (RpcIOT mc ms f) = ms
   type F (RpcIOT mc ms f) = f
   rpc    = rpcIO
+  {-# INLINE rpc #-}
   method = methodIO
+  {-# INLINE method #-}
   docs r = (Server.methodName $ method r, I.docs $ intfIO r)
+  {-# INLINE docs #-}
 
 
 stubsIO

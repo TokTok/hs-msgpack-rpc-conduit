@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 module Network.MessagePack.Capabilities
-  ( ServerCapability(..)
-  , ClientCapability(..)
+  ( ServerCapability (..)
+  , ClientCapability (..)
   ) where
 
 import           Data.MessagePack (MessagePack)

@@ -5,6 +5,8 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE ScopedTypeVariables        #-}
 {-# LANGUAGE Trustworthy                #-}
+{-# LANGUAGE TypeFamilies               #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 -------------------------------------------------------------------
 -- |
@@ -51,53 +53,38 @@ module Network.MessagePack.Server.Basic (
   , serve
   ) where
 
-import           Control.Applicative               (Applicative, pure, (<$>),
-                                                    (<|>))
-import           Control.Monad.Catch               (MonadCatch, MonadThrow,
-                                                    catch, throwM)
-import           Control.Monad.Trans               (MonadIO, MonadTrans, lift)
-import           Control.Monad.Trans.Control       (MonadBaseControl)
-import qualified Data.Binary                       as Binary
-import qualified Data.ByteString                   as S
-import           Data.Conduit                      (ResumableSource, Sink, ($$),
-                                                    ($$+), ($$++))
-import qualified Data.Conduit.Binary               as CB
-import           Data.Conduit.Network              (appSink, appSource,
-                                                    runGeneralTCPServer,
-                                                    serverSettings,
-                                                    setAfterBind)
-import           Data.Conduit.Serialization.Binary (ParseError, sinkGet)
-import qualified Data.List                         as List
-import           Data.MessagePack                  (MessagePack, Object,
-                                                    fromObject, toObject)
-import qualified Data.MessagePack.Result           as R
-import           Data.Monoid                       ((<>))
-import           Data.Text                         (Text)
-import qualified Data.Text                         as T
-import           Data.Traversable                  (sequenceA)
-import           Network.Socket                    (SocketOption (ReuseAddr),
-                                                    setSocketOption)
+import           Control.Applicative                    (Applicative, pure,
+                                                         (<$>), (<|>))
+import           Control.Monad.Catch                    (MonadCatch, MonadThrow,
+                                                         catch, throwM)
+import           Control.Monad.Trans                    (MonadIO, MonadTrans,
+                                                         lift, liftIO)
+import           Control.Monad.Trans.Control            (MonadBaseControl)
+import qualified Data.Binary                            as Binary
+import qualified Data.ByteString                        as S
+import           Data.Conduit                           (ResumableSource, Sink,
+                                                         ($$), ($$+), ($$++))
+import qualified Data.Conduit.Binary                    as CB
+import           Data.Conduit.Network                   (appSink, appSource,
+                                                         runGeneralTCPServer,
+                                                         serverSettings,
+                                                         setAfterBind)
+import           Data.Conduit.Serialization.Binary      (ParseError, sinkGet)
+import qualified Data.List                              as List
+import           Data.MessagePack                       (MessagePack, Object,
+                                                         fromObject, toObject)
+import qualified Data.MessagePack.Result                as R
+import           Data.Monoid                            ((<>))
+import           Data.Text                              (Text)
+import qualified Data.Text                              as T
+import           Data.Traversable                       (sequenceA)
+import           Network.Socket                         (SocketOption (ReuseAddr),
+                                                         setSocketOption)
 
+import           Network.MessagePack.Interface.Internal (IsReturnType (..),
+                                                         IsReturnTypeIO (..),
+                                                         Returns)
 import           Network.MessagePack.Types
-
-data MethodVal = MethodVal
-  { valName :: !Text
-  , valType :: !Text
-  }
-  deriving (Show)
-
-data MethodDocs = MethodDocs
-  { methodArgs :: ![MethodVal]
-  , methodRetv :: !MethodVal
-  }
-  deriving (Show)
-
--- ^ MessagePack RPC method
-data Method m = Method
-  { methodName :: !Text
-  , methodDocs :: !MethodDocs
-  , methodBody :: [Object] -> m Object
-  }
 
 
 newtype ServerT m a = ServerT { runServerT :: m a }
@@ -106,21 +93,10 @@ newtype ServerT m a = ServerT { runServerT :: m a }
 
 instance MonadTrans ServerT where
   lift = ServerT
+  {-# INLINE lift #-}
 
 
 type Server = ServerT IO
-
-
-class Monad m => MethodType m f where
-  -- | Create a RPC method from a Haskell function
-  toBody :: Text -> f -> [Object] -> m Object
-
-
-instance (Functor m, MonadThrow m, MessagePack o) => MethodType m (ServerT m o) where
-  toBody _ m [] = toObject <$> runServerT m
-  toBody n _ ls =
-    throwM $ ServerError $
-      "invalid arguments for method '" <> n <> "': " <> T.pack (show ls)
 
 
 instance (MonadThrow m, MessagePack o, MethodType m r) => MethodType m (o -> r) where
@@ -130,15 +106,25 @@ instance (MonadThrow m, MessagePack o, MethodType m r) => MethodType m (o -> r) 
       Just r  -> toBody n (f r) xs
   toBody _ _ [] = error "messagepack-rpc methodtype instance toBody failed"
 
+instance (Functor m, MonadThrow m, MessagePack o) => MethodType m (ServerT m o) where
+  toBody _ m [] = toObject <$> runServerT m
+  toBody n _ ls =
+    throwM $ ServerError $
+      "invalid arguments for method '" <> n <> "': " <> T.pack (show ls)
 
--- | Build a method
-method
-  :: MethodType m f
-  => Text     -- ^ Method name
-  -> MethodDocs
-  -> f        -- ^ Method body
-  -> Method m
-method name docs body = Method name docs $ toBody name body
+-- Pure server
+instance Monad m => IsReturnType m (Returns r) where
+  type HaskellType (Returns r) = r
+  type ServerType m (Returns r) = ServerT m r
+
+  implement _ = return
+
+-- IO Server
+instance MonadIO m => IsReturnTypeIO m (Returns r) where
+  type HaskellTypeIO (Returns r) = IO r
+  type ServerTypeIO m (Returns r) = ServerT m r
+
+  implementIO _ = liftIO
 
 
 processRequests

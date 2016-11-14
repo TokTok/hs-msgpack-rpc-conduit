@@ -13,12 +13,11 @@ import           Control.Monad.Trans                   (MonadIO, liftIO)
 import           Data.Text                             (Text)
 import           Data.Typeable                         (Typeable)
 
-import           Network.MessagePack.Client            (ClientT)
-import qualified Network.MessagePack.Client            as Client
 import qualified Network.MessagePack.Internal.TypeUtil as TypeUtil
-import           Network.MessagePack.Server            (Method, MethodDocs (..),
-                                                        MethodVal (..), ServerT)
-import qualified Network.MessagePack.Server            as Server
+import qualified Network.MessagePack.Types.Client      as Client
+import           Network.MessagePack.Types.Server      (Method, MethodDocs (..),
+                                                        MethodVal (..))
+import qualified Network.MessagePack.Types.Server      as Server
 
 
 data Returns r
@@ -87,9 +86,6 @@ deriving instance Show (Doc r) => Show (Doc (o -> r))
 class IsClientType (m :: * -> *) f where
   type ClientType m f
 
-instance IsClientType m (Returns r) where
-  type ClientType m (Returns r) = ClientT m r
-
 instance IsClientType m r => IsClientType m (o -> r) where
   type ClientType m (o -> r) = o -> ClientType m r
 
@@ -111,11 +107,6 @@ class IsReturnType (m :: * -> *) f where
 
   implement :: InterfaceM m f -> HaskellType f -> ServerType m f
 
-instance Monad m => IsReturnType m (Returns r) where
-  type HaskellType (Returns r) = r
-  type ServerType m (Returns r) = ServerT m r
-
-  implement _ = return
 
 instance IsReturnType m r => IsReturnType m (o -> r) where
   type HaskellType (o -> r) = o -> HaskellType r
@@ -158,12 +149,6 @@ class IsReturnTypeIO (m :: * -> *) f where
   type ServerTypeIO m f
 
   implementIO :: InterfaceM m f -> HaskellTypeIO f -> ServerTypeIO m f
-
-instance MonadIO m => IsReturnTypeIO m (Returns r) where
-  type HaskellTypeIO (Returns r) = IO r
-  type ServerTypeIO m (Returns r) = ServerT m r
-
-  implementIO _ = liftIO
 
 instance IsReturnTypeIO m r => IsReturnTypeIO m (o -> r) where
   type HaskellTypeIO (o -> r) = o -> HaskellTypeIO r

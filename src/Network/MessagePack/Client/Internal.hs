@@ -1,24 +1,32 @@
+{-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses      #-}
 {-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE TypeFamilies               #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Network.MessagePack.Client.Internal where
 
-import           Control.Applicative               (Applicative)
-import           Control.Monad                     (when)
-import           Control.Monad.Catch               (MonadCatch, MonadThrow,
-                                                    throwM)
-import qualified Control.Monad.State.Strict        as CMS
-import qualified Data.Binary                       as Binary
-import qualified Data.ByteString                   as S
-import           Data.Conduit                      (ResumableSource, Sink, ($$),
-                                                    ($$++))
-import qualified Data.Conduit.Binary               as CB
-import           Data.Conduit.Serialization.Binary (sinkGet)
-import           Data.MessagePack                  (Object, fromObject)
-import           Data.Monoid                       ((<>))
-import           Data.Text                         (Text)
-import qualified Data.Text                         as T
+import           Control.Applicative                    (Applicative)
+import           Control.Monad                          (when)
+import           Control.Monad.Catch                    (MonadCatch, MonadThrow,
+                                                         throwM)
+import qualified Control.Monad.State.Strict             as CMS
+import qualified Data.Binary                            as Binary
+import qualified Data.ByteString                        as S
+import           Data.Conduit                           (ResumableSource, Sink,
+                                                         ($$), ($$++))
+import qualified Data.Conduit.Binary                    as CB
+import           Data.Conduit.Serialization.Binary      (sinkGet)
+import           Data.MessagePack                       (Object, fromObject)
+import           Data.Monoid                            ((<>))
+import           Data.Text                              (Text)
+import qualified Data.Text                              as T
 
-import           Network.MessagePack.Types
+import           Network.MessagePack.Interface.Internal (IsClientType (..),
+                                                         Returns)
+import           Network.MessagePack.Types.Client
+import           Network.MessagePack.Types.Error
+import           Network.MessagePack.Types.Spec
 
 
 -- | RPC connection type
@@ -35,6 +43,9 @@ newtype ClientT m a
   deriving (Functor, Applicative, Monad, CMS.MonadIO, MonadThrow, MonadCatch)
 
 type Client a = ClientT IO a
+
+instance IsClientType m (Returns r) where
+  type ClientType m (Returns r) = ClientT m r
 
 
 rpcCall :: (MonadThrow m, CMS.MonadIO m) => Text -> [Object] -> ClientT m Object

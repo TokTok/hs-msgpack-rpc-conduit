@@ -1,5 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE Trustworthy         #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 -------------------------------------------------------------------
 -- |
@@ -56,7 +57,8 @@ import           Data.Text                           (Text)
 import qualified Data.Text                           as T
 
 import           Network.MessagePack.Client.Internal
-import           Network.MessagePack.Types
+import           Network.MessagePack.Types.Client
+import           Network.MessagePack.Types.Error
 
 
 execClient :: S.ByteString -> Int -> Client a -> IO a
@@ -71,9 +73,9 @@ execClient host port client =
       }
 
 
-class RpcType r where
-  rpcc :: Text -> [Object] -> r
-
+instance (MessagePack o, RpcType r) => RpcType (o -> r) where
+  rpcc name args arg = rpcc name (toObject arg : args)
+  {-# INLINE rpcc #-}
 
 instance (CMS.MonadIO m, MonadThrow m, MessagePack o)
     => RpcType (ClientT m o) where
@@ -84,11 +86,3 @@ instance (CMS.MonadIO m, MonadThrow m, MessagePack o)
         return ok
       R.Failure msg ->
         throwM $ ResultTypeError (T.pack msg) res
-
-instance (MessagePack o, RpcType r) => RpcType (o -> r) where
-  rpcc name args arg = rpcc name (toObject arg : args)
-
-
--- | Call an RPC Method
-call :: RpcType a => Text -> a
-call name = rpcc name []
