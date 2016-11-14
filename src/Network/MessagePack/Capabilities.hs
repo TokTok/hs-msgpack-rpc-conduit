@@ -1,5 +1,8 @@
 {-# LANGUAGE DeriveGeneric #-}
-module Network.MessagePack.Capabilities where
+module Network.MessagePack.Capabilities
+  ( ServerCapability(..)
+  , ClientCapability(..)
+  ) where
 
 import           Data.MessagePack (MessagePack)
 import           GHC.Generics     (Generic)

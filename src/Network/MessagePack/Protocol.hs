@@ -2,7 +2,15 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings     #-}
 
-module Network.MessagePack.Protocol where
+module Network.MessagePack.Protocol
+  ( capabilitiesN
+  , capabilitiesC
+  , capabilitiesS
+  , methodListN
+  , methodListC
+  , methodListS
+  , protocolMethods
+  ) where
 
 import           Control.Applicative              (Applicative, pure)
 import           Control.Monad.Catch              (MonadCatch)
