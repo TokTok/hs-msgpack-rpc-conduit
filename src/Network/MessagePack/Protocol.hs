@@ -1,18 +1,21 @@
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
+
 module Network.MessagePack.Protocol where
 
 import           Control.Applicative              (Applicative, pure)
 import           Control.Monad.Catch              (MonadCatch)
 import           Control.Monad.Trans              (MonadIO)
 import           Control.Monad.Trans.Control      (MonadBaseControl)
+import           Data.Text                        (Text)
 
 import           Network.MessagePack.Capabilities
 import           Network.MessagePack.Client.Basic
 import           Network.MessagePack.Server.Basic
 
 
-capabilitiesN :: String
+capabilitiesN :: Text
 capabilitiesN = "rpc.capabilities"
 
 capabilitiesC :: [ClientCapability] -> Client [ServerCapability]
@@ -26,16 +29,16 @@ capabilitiesS
 capabilitiesS _ _ = pure [SCapMethodList]
 
 
-methodListN :: String
+methodListN :: Text
 methodListN = "rpc.methodList"
 
-methodListC :: Client [String]
+methodListC :: Client [Text]
 methodListC = call methodListN
 
 methodListS
   :: Applicative m
   => [Method m]
-  -> ServerT m [String]
+  -> ServerT m [Text]
 methodListS = pure . map methodName
 
 

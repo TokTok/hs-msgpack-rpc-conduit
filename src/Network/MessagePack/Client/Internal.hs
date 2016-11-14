@@ -1,4 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings          #-}
 module Network.MessagePack.Client.Internal where
 
 import           Control.Applicative               (Applicative)
@@ -13,16 +14,19 @@ import           Data.Conduit                      (ResumableSource, Sink, ($$),
 import qualified Data.Conduit.Binary               as CB
 import           Data.Conduit.Serialization.Binary (sinkGet)
 import           Data.MessagePack                  (Object, fromObject)
+import           Data.Monoid                       ((<>))
+import           Data.Text                         (Text)
+import qualified Data.Text                         as T
 
 import           Network.MessagePack.Types
 
 
 -- | RPC connection type
 data Connection m = Connection
-  { connSource :: ResumableSource m S.ByteString
-  , connSink   :: Sink S.ByteString m ()
-  , connMsgId  :: Int
-  , connMths   :: [String]
+  { connSource :: !(ResumableSource m S.ByteString)
+  , connSink   :: !(Sink S.ByteString m ())
+  , connMsgId  :: !Int
+  , connMths   :: ![Text]
   }
 
 
@@ -33,7 +37,7 @@ newtype ClientT m a
 type Client a = ClientT IO a
 
 
-rpcCall :: (MonadThrow m, CMS.MonadIO m) => String -> [Object] -> ClientT m Object
+rpcCall :: (MonadThrow m, CMS.MonadIO m) => Text -> [Object] -> ClientT m Object
 rpcCall methodName args = ClientT $ do
   conn <- CMS.get
   let msgid = connMsgId conn
@@ -53,18 +57,18 @@ rpcCall methodName args = ClientT $ do
     Just (rtype, rmsgid, rerror, rresult) -> do
       when (rtype /= 1) $
         throwM $ ProtocolError $
-          "invalid response type (expect 1, but got " ++ show rtype ++ "): " ++ show res
+          "invalid response type (expect 1, but got " <> T.pack (show rtype) <> "): " <> T.pack (show res)
 
       when (rmsgid /= msgid) $
         throwM $ ProtocolError $
-          "message id mismatch: expect " ++ show msgid ++ ", but got " ++ show rmsgid
+          "message id mismatch: expect " <> T.pack (show msgid) <> ", but got " <> T.pack (show rmsgid)
 
       case fromObject rerror of
         Nothing -> throwM $ RemoteError rerror
         Just () -> return rresult
 
 
-setMethodList :: Monad m => [String] -> ClientT m ()
+setMethodList :: Monad m => [Text] -> ClientT m ()
 setMethodList mths = ClientT $ do
   conn <- CMS.get
   CMS.put conn { connMths = mths }

@@ -59,6 +59,7 @@ library
     , mtl
     , network
     , tagged
+    , text
 
 test-suite testsuite
   type: exitcode-stdio-1.0

@@ -5,6 +5,7 @@ import           Control.Exception    (Exception)
 import qualified Data.ByteString.Lazy as L
 import qualified Data.List            as List
 import           Data.MessagePack     (MessagePack, Object, fromObject, pack)
+import           Data.Text            (Text)
 import           Data.Typeable        (Typeable)
 
 
@@ -31,15 +32,15 @@ unpackRequest = fromObject
 
 -- | RPC error type
 data RpcError
-  = RemoteError Object            -- ^ Server error
-  | ResultTypeError String Object -- ^ Result type mismatch
-  | ProtocolError String          -- ^ Protocol error
+  = RemoteError !Object           -- ^ Server error
+  | ResultTypeError !Text !Object -- ^ Result type mismatch
+  | ProtocolError !Text           -- ^ Protocol error
   deriving (Show, Eq, Ord, Typeable)
 
 instance Exception RpcError
 
 
-data ServerError = ServerError String
+newtype ServerError = ServerError Text
   deriving (Show, Typeable)
 
 instance Exception ServerError

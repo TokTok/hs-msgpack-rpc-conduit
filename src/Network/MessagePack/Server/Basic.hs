@@ -59,8 +59,8 @@ import           Control.Monad.Trans               (MonadIO, MonadTrans, lift)
 import           Control.Monad.Trans.Control       (MonadBaseControl)
 import qualified Data.Binary                       as Binary
 import qualified Data.ByteString                   as S
-import           Data.Conduit                      (($$), ($$+), ($$++))
-import           Data.Conduit                      (ResumableSource, Sink)
+import           Data.Conduit                      (ResumableSource, Sink, ($$),
+                                                    ($$+), ($$++))
 import qualified Data.Conduit.Binary               as CB
 import           Data.Conduit.Network              (appSink, appSource,
                                                     runGeneralTCPServer,
@@ -71,6 +71,9 @@ import qualified Data.List                         as List
 import           Data.MessagePack                  (MessagePack, Object,
                                                     fromObject, toObject)
 import qualified Data.MessagePack.Result           as R
+import           Data.Monoid                       ((<>))
+import           Data.Text                         (Text)
+import qualified Data.Text                         as T
 import           Data.Traversable                  (sequenceA)
 import           Network.Socket                    (SocketOption (ReuseAddr),
                                                     setSocketOption)
@@ -78,21 +81,21 @@ import           Network.Socket                    (SocketOption (ReuseAddr),
 import           Network.MessagePack.Types
 
 data MethodVal = MethodVal
-  { valName :: String
-  , valType :: String
+  { valName :: !Text
+  , valType :: !Text
   }
   deriving (Show)
 
 data MethodDocs = MethodDocs
-  { methodArgs :: [MethodVal]
-  , methodRetv :: MethodVal
+  { methodArgs :: ![MethodVal]
+  , methodRetv :: !MethodVal
   }
   deriving (Show)
 
 -- ^ MessagePack RPC method
 data Method m = Method
-  { methodName :: String
-  , methodDocs :: MethodDocs
+  { methodName :: !Text
+  , methodDocs :: !MethodDocs
   , methodBody :: [Object] -> m Object
   }
 
@@ -110,14 +113,14 @@ type Server = ServerT IO
 
 class Monad m => MethodType m f where
   -- | Create a RPC method from a Haskell function
-  toBody :: String -> f -> [Object] -> m Object
+  toBody :: Text -> f -> [Object] -> m Object
 
 
 instance (Functor m, MonadThrow m, MessagePack o) => MethodType m (ServerT m o) where
   toBody _ m [] = toObject <$> runServerT m
   toBody n _ ls =
     throwM $ ServerError $
-      "invalid arguments for method '" ++ n ++ "': " ++ show ls
+      "invalid arguments for method '" <> n <> "': " <> T.pack (show ls)
 
 
 instance (MonadThrow m, MessagePack o, MethodType m r) => MethodType m (o -> r) where
@@ -131,7 +134,7 @@ instance (MonadThrow m, MessagePack o, MethodType m r) => MethodType m (o -> r) 
 -- | Build a method
 method
   :: MethodType m f
-  => String   -- ^ Method name
+  => Text     -- ^ Method name
   -> MethodDocs
   -> f        -- ^ Method body
   -> Method m
@@ -171,7 +174,7 @@ getResponse methods (0, msgid, mth, args) =
     process (R.Success ok ) = (1, msgid, toObject (), ok)
 
 getResponse _ (rtype, msgid, _, _) =
-  pure (1, msgid, toObject ["request type is not 0, got " ++ show rtype], toObject ())
+  pure (1, msgid, toObject ["request type is not 0, got " <> T.pack (show rtype)], toObject ())
 
 
 callMethod
@@ -188,12 +191,12 @@ callMethod methods mth args = sequenceA $
   where
     stringCall name =
       case List.find ((== name) . methodName) methods of
-        Nothing -> R.Failure $ "method '" ++ name ++ "' not found"
+        Nothing -> R.Failure $ "method '" <> T.unpack name <> "' not found"
         Just m  -> R.Success $ methodBody m args
 
     intCall ix =
       case drop ix methods of
-        []  -> R.Failure $ "method #" ++ show ix ++ " not found"
+        []  -> R.Failure $ "method #" <> show ix <> " not found"
         m:_ -> R.Success $ methodBody m args
 
 

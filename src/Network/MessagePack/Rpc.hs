@@ -13,6 +13,7 @@ module Network.MessagePack.Rpc
   ) where
 
 import           Control.Monad.Catch                    (MonadThrow)
+import           Data.Text                              (Text)
 
 import qualified Network.MessagePack.Client             as Client
 import qualified Network.MessagePack.Interface.Internal as I
@@ -25,7 +26,7 @@ class RpcService rpc where
   type F rpc
   rpc    :: rpc -> I.ClientType (ClientMonad rpc) (F rpc)
   method :: rpc -> Server.Method (ServerMonad rpc)
-  docs   :: rpc -> (String, I.Doc (F rpc))
+  docs   :: rpc -> (Text, I.Doc (F rpc))
 
 
 --------------------------------------------------------------------------------
@@ -37,10 +38,10 @@ class RpcService rpc where
 type Rpc f = RpcT IO IO f
 
 data RpcT mc ms f = RpcT
-  { rpcPure    :: I.ClientType mc f
-  , local      :: I.HaskellType f
-  , methodPure :: Server.Method ms
-  , intfPure   :: I.Interface f
+  { rpcPure    :: !(I.ClientType mc f)
+  , local      :: !(I.HaskellType f)
+  , methodPure :: !(Server.Method ms)
+  , intfPure   :: !(I.Interface f)
   }
 
 instance RpcService (RpcT mc ms f) where
@@ -59,7 +60,7 @@ stubs
      , I.IsDocType f
      , MonadThrow ms
      )
-  => String -> I.Doc f -> I.HaskellType f -> RpcT mc ms f
+  => Text -> I.Doc f -> I.HaskellType f -> RpcT mc ms f
 stubs n doc f = RpcT c f m i
   where
     c = Client.call n
@@ -76,10 +77,10 @@ stubs n doc f = RpcT c f m i
 type RpcIO f = RpcIOT IO IO f
 
 data RpcIOT mc ms f = RpcIOT
-  { rpcIO    :: I.ClientType mc f
-  , localIO  :: I.HaskellTypeIO f
-  , methodIO :: Server.Method ms
-  , intfIO   :: I.Interface f
+  { rpcIO    :: !(I.ClientType mc f)
+  , localIO  :: !(I.HaskellTypeIO f)
+  , methodIO :: !(Server.Method ms)
+  , intfIO   :: !(I.Interface f)
   }
 
 instance RpcService (RpcIOT mc ms f) where
@@ -98,7 +99,7 @@ stubsIO
      , I.IsDocType f
      , MonadThrow ms
      )
-  => String -> I.Doc f -> I.HaskellTypeIO f -> RpcIOT mc ms f
+  => Text -> I.Doc f -> I.HaskellTypeIO f -> RpcIOT mc ms f
 stubsIO n doc f = RpcIOT c f m i
   where
     c = Client.call n

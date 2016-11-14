@@ -52,6 +52,8 @@ import           Data.Conduit.Network                (appSink, appSource,
 import           Data.MessagePack                    (MessagePack, Object,
                                                       fromObject, toObject)
 import qualified Data.MessagePack.Result             as R
+import           Data.Text                           (Text)
+import qualified Data.Text                           as T
 
 import           Network.MessagePack.Client.Internal
 import           Network.MessagePack.Types
@@ -70,7 +72,7 @@ execClient host port client =
 
 
 class RpcType r where
-  rpcc :: String -> [Object] -> r
+  rpcc :: Text -> [Object] -> r
 
 
 instance (CMS.MonadIO m, MonadThrow m, MessagePack o)
@@ -81,12 +83,12 @@ instance (CMS.MonadIO m, MonadThrow m, MessagePack o)
       R.Success ok  ->
         return ok
       R.Failure msg ->
-        throwM $ ResultTypeError msg res
+        throwM $ ResultTypeError (T.pack msg) res
 
 instance (MessagePack o, RpcType r) => RpcType (o -> r) where
   rpcc name args arg = rpcc name (toObject arg : args)
 
 
 -- | Call an RPC Method
-call :: RpcType a => String -> a
+call :: RpcType a => Text -> a
 call name = rpcc name []

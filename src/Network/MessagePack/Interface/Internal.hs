@@ -10,6 +10,7 @@ module Network.MessagePack.Interface.Internal where
 
 import           Control.Monad.Catch                   (MonadThrow)
 import           Control.Monad.Trans                   (MonadIO, liftIO)
+import           Data.Text                             (Text)
 import           Data.Typeable                         (Typeable)
 
 import           Network.MessagePack.Client            (ClientT)
@@ -24,17 +25,17 @@ data Returns r
 
 
 data Interface f = Interface
-  { name :: String
-  , docs :: Doc f
+  { name :: !Text
+  , docs :: !(Doc f)
   }
 
 
 data InterfaceM (m :: * -> *) f = InterfaceM
-  { nameM :: String
+  { nameM :: !Text
   }
 
 
-interface :: String -> Doc f -> Interface f
+interface :: Text -> Doc f -> Interface f
 interface = Interface
 
 
@@ -58,14 +59,14 @@ class IsDocType f where
   flatDoc :: Doc f -> MethodDocs
 
 instance Typeable r => IsDocType (Returns r) where
-  data Doc (Returns r) = Ret String
+  data Doc (Returns r) = Ret Text
     deriving (Eq, Read, Show)
   flatDoc (Ret x) =
     let typeName = TypeUtil.typeName (undefined :: r) in
     MethodDocs [] (MethodVal x typeName)
 
 instance (Typeable o, IsDocType r) => IsDocType (o -> r) where
-  data Doc (o -> r) = Arg String (Doc r)
+  data Doc (o -> r) = Arg Text (Doc r)
   flatDoc (Arg o r) =
     let doc = flatDoc r in
     let typeName = TypeUtil.typeName (undefined :: o) in
