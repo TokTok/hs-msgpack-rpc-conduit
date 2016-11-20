@@ -52,7 +52,8 @@ library
     , conduit
     , conduit-extra
     , data-default-class
-    , data-msgpack      >= 0.0.4
+    , data-default-instances-base
+    , data-msgpack                      >= 0.0.4
     , exceptions
     , monad-control
     , mtl
@@ -66,6 +67,8 @@ test-suite testsuite
       -Wall
   hs-source-dirs: test
   main-is: testsuite.hs
+  other-modules:
+      Network.MessagePack.ServerSpec
   build-depends:
       base < 5
     , async

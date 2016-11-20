@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE Safe                  #-}
 {-# LANGUAGE TypeFamilies          #-}
 module Network.MessagePack.Rpc
   ( I.Returns

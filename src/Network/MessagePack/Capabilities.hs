@@ -11,7 +11,7 @@ data ServerCapability
     -- instead of strings for names. It supports the "internal.methodList" call
     -- to return an ordered list of method names. The client can send an index
     -- in this list instead of the name itself when performing an RPC call.
-  deriving (Eq, Read, Show, Generic)
+  deriving (Eq, Generic)
 
 instance MessagePack ServerCapability
 
@@ -20,8 +20,6 @@ data ClientCapability
   = CCapMethodList
     -- ^ Client supports method lists and can send more efficient method codes
     -- instead of strings for names.
-  deriving (Eq, Read, Show, Generic)
+  deriving (Eq, Generic)
 
 instance MessagePack ClientCapability
-
-

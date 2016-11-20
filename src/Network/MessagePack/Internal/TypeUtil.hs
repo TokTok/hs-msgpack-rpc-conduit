@@ -1,3 +1,4 @@
+{-# LANGUAGE Trustworthy #-}
 module Network.MessagePack.Internal.TypeUtil where
 
 import qualified Data.List.Utils as List

@@ -26,6 +26,10 @@ addI :: Interface (Int -> Int -> Returns Int)
 addC :: Int -> Int -> Client Int
 (addI, addC) = (interface "add" (Arg "a" $ Arg "b" $ Ret "sum"), call . concrete $ addI)
 
+addR :: Rpc.Rpc (Int -> Int -> Returns Int)
+addR = Rpc.stubs "add" (Arg "a" $ Arg "b" $ Ret "sum")
+  add
+
 
 echo :: String -> IO String
 echo s = return $ "***" ++ s ++ "***"
@@ -79,6 +83,15 @@ spec = do
   describe "documentation" $ do
     it "is type-safe" $
       Rpc.docs helloR `shouldBe` ("hello", Arg "name" $ Ret "hello")
+
+    it "works for IO and non-IO" $ do
+      Rpc.docs helloR   `shouldBe` ("hello"  , Arg "name" $ Ret "hello")
+      Rpc.docs helloIOR `shouldBe` ("helloIO", Arg "name" $ Ret "hello")
+
+    it "has working read/show implementations" $ do
+      let docs = Rpc.docs addR
+      read (show docs) `shouldBe` docs
+      show docs `shouldBe` "(\"add\",Arg \"a\" (Arg \"b\" (Ret \"sum\")))"
 
     it "can be retrieved from type-erased methods" $ do
       let docs = map Server.methodDocs methods
