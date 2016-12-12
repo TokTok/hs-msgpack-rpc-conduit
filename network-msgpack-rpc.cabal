@@ -34,6 +34,7 @@ library
       Network.MessagePack.Interface
       Network.MessagePack.Rpc
       Network.MessagePack.Server
+      Network.MessagePack.Types
   other-modules:
       Network.MessagePack.Capabilities
       Network.MessagePack.Client.Basic
@@ -42,7 +43,6 @@ library
       Network.MessagePack.Internal.TypeUtil
       Network.MessagePack.Protocol
       Network.MessagePack.Server.Basic
-      Network.MessagePack.Types
       Network.MessagePack.Types.Client
       Network.MessagePack.Types.Error
       Network.MessagePack.Types.Server
