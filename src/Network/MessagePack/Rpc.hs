@@ -19,6 +19,11 @@ import qualified Network.MessagePack.Interface.Internal as I
 import qualified Network.MessagePack.Types.Client       as Client
 import qualified Network.MessagePack.Types.Server       as Server
 
+-- Import orphan instances for RpcType and IsReturnType.
+-- TODO(SX91): Avoid orphan instances. See issue #7.
+import           Network.MessagePack.Client.Basic       ()
+import           Network.MessagePack.Server.Basic       ()
+
 
 class RpcService rpc where
   type ClientMonad rpc :: * -> *
