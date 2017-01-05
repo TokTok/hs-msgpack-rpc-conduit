@@ -17,7 +17,9 @@ import           Data.Conduit                           (ResumableSource, Sink,
                                                          ($$), ($$++))
 import qualified Data.Conduit.Binary                    as CB
 import           Data.Conduit.Serialization.Binary      (sinkGet)
-import           Data.MessagePack                       (Object, fromObject)
+import           Data.MessagePack                       (MessagePack (fromObject),
+                                                         Object)
+import qualified Data.MessagePack.Result                as R
 import           Data.Monoid                            ((<>))
 import           Data.Text                              (Text)
 import qualified Data.Text                              as T
@@ -46,6 +48,17 @@ type Client a = ClientT IO a
 
 instance IsClientType m (Returns r) where
   type ClientType m (Returns r) = ClientT m r
+
+
+instance (CMS.MonadIO m, MonadThrow m, MessagePack o)
+    => RpcType (ClientT m o) where
+  rpcc name args = do
+    res <- rpcCall name (reverse args)
+    case fromObject res of
+      R.Success ok  ->
+        return ok
+      R.Failure msg ->
+        throwM $ ResultTypeError (T.pack msg) res
 
 
 rpcCall :: (MonadThrow m, CMS.MonadIO m) => Text -> [Object] -> ClientT m Object

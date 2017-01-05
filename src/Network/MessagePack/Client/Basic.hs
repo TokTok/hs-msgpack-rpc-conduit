@@ -1,6 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE Trustworthy         #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 -------------------------------------------------------------------
 -- |
@@ -71,18 +70,3 @@ execClient host port client =
       , connMsgId  = 0
       , connMths   = []
       }
-
-
-instance (MessagePack o, RpcType r) => RpcType (o -> r) where
-  rpcc name args arg = rpcc name (toObject arg : args)
-  {-# INLINE rpcc #-}
-
-instance (CMS.MonadIO m, MonadThrow m, MessagePack o)
-    => RpcType (ClientT m o) where
-  rpcc name args = do
-    res <- rpcCall name (reverse args)
-    case fromObject res of
-      R.Success ok  ->
-        return ok
-      R.Failure msg ->
-        throwM $ ResultTypeError (T.pack msg) res
