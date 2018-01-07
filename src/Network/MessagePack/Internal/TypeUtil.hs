@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE Trustworthy       #-}
+{-# LANGUAGE Safe              #-}
 module Network.MessagePack.Internal.TypeUtil
   ( typeName
   ) where

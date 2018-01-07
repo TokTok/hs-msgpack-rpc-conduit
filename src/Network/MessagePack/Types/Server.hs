@@ -1,6 +1,5 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE Trustworthy           #-}
-
+{-# LANGUAGE Safe                  #-}
 module Network.MessagePack.Types.Server
   ( MethodVal (..)
   , MethodDocs (..)
@@ -9,10 +8,10 @@ module Network.MessagePack.Types.Server
   , method
   ) where
 
-
 import           Control.Monad    (Monad)
 import           Data.MessagePack (Object)
 import           Data.Text        (Text)
+
 
 data MethodVal = MethodVal
   { valName :: !Text

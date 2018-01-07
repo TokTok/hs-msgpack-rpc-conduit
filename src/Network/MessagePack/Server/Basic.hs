@@ -73,7 +73,7 @@ import           Data.Conduit.Serialization.Binary      (ParseError, sinkGet)
 import qualified Data.List                              as List
 import           Data.MessagePack                       (MessagePack, Object,
                                                          fromObject, toObject)
-import qualified Data.MessagePack.Result                as R
+import qualified Data.MessagePack.Types.Result          as R
 import           Data.Monoid                            ((<>))
 import           Data.Text                              (Text)
 import qualified Data.Text                              as T

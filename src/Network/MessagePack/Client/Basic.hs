@@ -51,7 +51,7 @@ import           Data.Conduit.Network                (appSink, appSource,
                                                       runTCPClient)
 import           Data.MessagePack                    (MessagePack, Object,
                                                       fromObject, toObject)
-import qualified Data.MessagePack.Result             as R
+import qualified Data.MessagePack.Types.Result       as R
 import           Data.Text                           (Text)
 import qualified Data.Text                           as T
 
