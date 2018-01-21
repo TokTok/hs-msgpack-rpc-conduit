@@ -1,0 +1,28 @@
+load("@io_tweag_rules_haskell//haskell:haskell.bzl", "haskell_library")
+
+haskell_library(
+    name = "hs-msgpack-rpc",
+    srcs = glob(["src/**/*.*hs"]),
+    prebuilt_dependencies = [
+        "base",
+        "binary",
+        "bytestring",
+    ],
+    src_strip_prefix = "src",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//hs-msgpack",
+        "//hs-msgpack-types",
+        "@haskell_MissingH//:MissingH",
+        "@haskell_binary_conduit//:binary-conduit",
+        "@haskell_conduit//:conduit",
+        "@haskell_conduit_extra//:conduit-extra",
+        "@haskell_data_default_class//:data-default-class",
+        "@haskell_data_default_instances_base//:data-default-instances-base",
+        "@haskell_exceptions//:exceptions",
+        "@haskell_monad_control//:monad-control",
+        "@haskell_mtl//:mtl",
+        "@haskell_network//:network",
+        "@haskell_text//:text",
+    ],
+)
