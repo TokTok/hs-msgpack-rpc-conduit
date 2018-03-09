@@ -9,7 +9,6 @@
 module Network.MessagePack.Interface.Internal where
 
 import           Control.Monad.Catch                   (MonadThrow)
-import           Control.Monad.Trans                   (MonadIO, liftIO)
 import           Data.Text                             (Text)
 import           Data.Typeable                         (Typeable)
 

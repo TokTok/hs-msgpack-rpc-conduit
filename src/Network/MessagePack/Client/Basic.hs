@@ -42,18 +42,12 @@ module Network.MessagePack.Client.Basic (
   , RpcType (..)
   ) where
 
-import           Control.Monad.Catch                 (MonadThrow, throwM)
 import qualified Control.Monad.State.Strict          as CMS
 import qualified Data.ByteString                     as S
 import           Data.Conduit                        (($$+))
 import           Data.Conduit.Network                (appSink, appSource,
                                                       clientSettings,
                                                       runTCPClient)
-import           Data.MessagePack                    (MessagePack, Object,
-                                                      fromObject, toObject)
-import qualified Data.MessagePack.Types.Result       as R
-import           Data.Text                           (Text)
-import qualified Data.Text                           as T
 
 import           Network.MessagePack.Client.Internal
 import           Network.MessagePack.Types.Client

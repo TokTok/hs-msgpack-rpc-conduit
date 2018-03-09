@@ -17,7 +17,7 @@ module Network.MessagePack.Client (
 
 import           Control.Applicative                 (Applicative, pure)
 import           Control.Monad                       (when)
-import           Control.Monad.Catch                 (MonadCatch, catch)
+import           Control.Monad.Catch                 (catch)
 import qualified Data.ByteString                     as S
 import           Data.Default.Class                  (Default (..))
 import           Data.Default.Instances.Base         ()

@@ -75,7 +75,6 @@ import           Data.MessagePack                       (MessagePack, Object,
                                                          fromObject, toObject)
 import qualified Data.MessagePack.Types.Result          as R
 import           Data.Monoid                            ((<>))
-import           Data.Text                              (Text)
 import qualified Data.Text                              as T
 import           Data.Traversable                       (sequenceA)
 import           Network.Socket                         (SocketOption (ReuseAddr),
