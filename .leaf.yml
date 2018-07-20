@@ -1,5 +1,0 @@
-inherits: haskell
-
-package:
-  name: network-msgpack-rpc
-  version: 0.0.4
