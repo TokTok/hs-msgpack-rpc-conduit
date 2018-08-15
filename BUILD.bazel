@@ -17,6 +17,8 @@ haskell_library(
         "//third_party/haskell:base",
         "//third_party/haskell:binary",
         "//third_party/haskell:bytestring",
+        "//third_party/haskell:mtl",
+        "//third_party/haskell:text",
         "@haskell_MissingH//:MissingH",
         "@haskell_binary_conduit//:binary-conduit",
         "@haskell_conduit//:conduit",
@@ -25,8 +27,6 @@ haskell_library(
         "@haskell_data_default_instances_base//:data-default-instances-base",
         "@haskell_exceptions//:exceptions",
         "@haskell_monad_control//:monad-control",
-        "@haskell_mtl//:mtl",
         "@haskell_network//:network",
-        "@haskell_text//:text",
     ],
 )
