@@ -49,7 +49,6 @@ library
       Network.MessagePack.Types.Spec
   build-depends:
       base < 5
-    , MissingH
     , binary
     , binary-conduit
     , bytestring
@@ -62,7 +61,7 @@ library
     , exceptions
     , monad-control
     , mtl
-    , network
+    , network                           < 3
     , tagged
     , text
 
@@ -81,5 +80,5 @@ test-suite testsuite
     , bytestring
     , hspec
     , mtl
-    , network
+    , network                           < 3
     , network-msgpack-rpc
