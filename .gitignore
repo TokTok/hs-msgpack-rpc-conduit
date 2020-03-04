@@ -1,6 +1,7 @@
 # Build products.
 /dist
 /.stack-work
+/stack.yaml.lock
 /*.tix
 /.*.pid
 /.*.stamp
