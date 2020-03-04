@@ -28,7 +28,7 @@ data Interface f = Interface
   }
 
 
-data InterfaceM (m :: * -> *) f = InterfaceM
+newtype InterfaceM (m :: * -> *) f = InterfaceM
   { nameM :: !Text
   }
 
