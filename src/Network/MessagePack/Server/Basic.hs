@@ -57,13 +57,16 @@ import           Control.Applicative                    (Applicative, pure,
                                                          (<$>), (<|>))
 import           Control.Monad.Catch                    (MonadCatch, MonadThrow,
                                                          catch, throwM)
+import           Control.Monad.IO.Unlift                (MonadUnliftIO)
 import           Control.Monad.Trans                    (MonadIO, MonadTrans,
                                                          lift, liftIO)
 import           Control.Monad.Trans.Control            (MonadBaseControl)
 import qualified Data.Binary                            as Binary
 import qualified Data.ByteString                        as S
-import           Data.Conduit                           (ResumableSource, Sink,
-                                                         ($$), ($$+), ($$++))
+import           Data.Conduit                           (ConduitT,
+                                                         SealedConduitT, Void,
+                                                         runConduit, ($$+),
+                                                         ($$++), (.|))
 import qualified Data.Conduit.Binary                    as CB
 import           Data.Conduit.Network                   (appSink, appSource,
                                                          runGeneralTCPServer,
@@ -129,8 +132,8 @@ instance MonadIO m => IsReturnTypeIO m (Returns r) where
 processRequests
   :: (Applicative m, MonadThrow m, MonadCatch m)
   => [Method m]
-  -> ResumableSource m S.ByteString
-  -> Sink S.ByteString m t
+  -> SealedConduitT () S.ByteString m ()
+  -> ConduitT S.ByteString Void m t
   -> m b
 processRequests methods rsrc sink = do
   (rsrc', res) <-
@@ -143,7 +146,7 @@ processRequests methods rsrc sink = do
           lift $ getResponse methods req `catch` \(ServerError err) ->
             return (1, msgid, toObject err, toObject ())
 
-  _ <- CB.sourceLbs (packResponse res) $$ sink
+  _ <- runConduit $ CB.sourceLbs (packResponse res) .| sink
   processRequests methods rsrc' sink
 
 
@@ -191,7 +194,7 @@ ignoreParseError _ = pure ()
 
 -- | Start RPC server with a set of RPC methods.
 serve
-  :: (MonadBaseControl IO m, MonadIO m, MonadCatch m)
+  :: (MonadBaseControl IO m, MonadIO m, MonadCatch m, MonadUnliftIO m)
   => Int        -- ^ Port number
   -> [Method m] -- ^ list of methods
   -> m ()

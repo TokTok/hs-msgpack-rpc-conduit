@@ -13,8 +13,10 @@ import           Control.Monad.Catch                    (MonadCatch, MonadThrow,
 import qualified Control.Monad.State.Strict             as CMS
 import qualified Data.Binary                            as Binary
 import qualified Data.ByteString                        as S
-import           Data.Conduit                           (ResumableSource, Sink,
-                                                         ($$), ($$++))
+import           Data.Conduit                           (ConduitT,
+                                                         SealedConduitT, Void,
+                                                         runConduit, ($$++),
+                                                         (.|))
 import qualified Data.Conduit.Binary                    as CB
 import           Data.Conduit.Serialization.Binary      (sinkGet)
 import           Data.MessagePack                       (MessagePack (fromObject),
@@ -33,8 +35,8 @@ import           Network.MessagePack.Types.Spec
 
 -- | RPC connection type
 data Connection m = Connection
-  { connSource :: !(ResumableSource m S.ByteString)
-  , connSink   :: !(Sink S.ByteString m ())
+  { connSource :: !(SealedConduitT () S.ByteString m ())
+  , connSink   :: !(ConduitT S.ByteString Void m ())
   , connMsgId  :: !Int
   , connMths   :: ![Text]
   }
@@ -68,7 +70,7 @@ rpcCall methodName args = ClientT $ do
 
   (rsrc', res) <- CMS.lift $ do
     let req = packRequest (connMths conn) (0, msgid, methodName, args)
-    CB.sourceLbs req $$ connSink conn
+    runConduit $ CB.sourceLbs req .| connSink conn
     connSource conn $$++ sinkGet Binary.get
 
   CMS.put conn

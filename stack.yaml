@@ -1,6 +1,5 @@
 ---
 packages: [.]
-resolver: lts-6.27
+resolver: lts-14.27
 extra-deps:
-  - data-msgpack-0.0.12
-  - data-msgpack-types-0.0.2
+  - data-default-instances-base-0.1.0.1@sha256:985a13d7103e45a65f06f277b735ef025636014f0d29dd6de998bc7628e09be9,509

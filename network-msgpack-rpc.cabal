@@ -1,5 +1,5 @@
 name:                 network-msgpack-rpc
-version:              0.0.5
+version:              0.0.6
 synopsis:             A MessagePack-RPC Implementation
 homepage:             http://msgpack.org/
 license:              BSD3
@@ -52,7 +52,7 @@ library
     , binary
     , binary-conduit
     , bytestring
-    , conduit                           <= 1.2.13
+    , conduit
     , conduit-extra
     , data-default-class
     , data-default-instances-base
@@ -64,6 +64,7 @@ library
     , network                           < 3
     , tagged
     , text
+    , unliftio-core
 
 test-suite testsuite
   type: exitcode-stdio-1.0
