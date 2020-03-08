@@ -8,7 +8,7 @@ import           Control.Concurrent            (threadDelay)
 import           Control.Concurrent.Async      (race_)
 import           Control.Monad.Trans           (liftIO)
 import qualified Data.ByteString               as S
-import           Network                       (withSocketsDo)
+import           Network.Socket                (withSocketsDo)
 
 import           Network.MessagePack.Client    (Client)
 import qualified Network.MessagePack.Client    as Client

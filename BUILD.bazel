@@ -16,7 +16,7 @@ haskell_library(
         "-Wno-unused-imports",
     ],
     src_strip_prefix = "src",
-    version = "0.0.5",
+    version = "0.0.6",
     visibility = ["//visibility:public"],
     deps = [
         "//hs-msgpack",
@@ -34,6 +34,7 @@ haskell_library(
         hazel_library("mtl"),
         hazel_library("network"),
         hazel_library("text"),
+        hazel_library("unliftio-core"),
     ],
 )
 
