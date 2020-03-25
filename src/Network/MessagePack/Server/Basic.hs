@@ -53,39 +53,37 @@ module Network.MessagePack.Server.Basic (
   , serve
   ) where
 
-import           Control.Applicative                    (Applicative, pure,
-                                                         (<$>), (<|>))
-import           Control.Monad.Catch                    (MonadCatch, MonadThrow,
-                                                         catch, throwM)
-import           Control.Monad.IO.Unlift                (MonadUnliftIO)
-import           Control.Monad.Trans                    (MonadIO, MonadTrans,
-                                                         lift, liftIO)
-import           Control.Monad.Trans.Control            (MonadBaseControl)
-import qualified Data.Binary                            as Binary
-import qualified Data.ByteString                        as S
-import           Data.Conduit                           (ConduitT,
-                                                         SealedConduitT, Void,
-                                                         runConduit, ($$+),
-                                                         ($$++), (.|))
-import qualified Data.Conduit.Binary                    as CB
-import           Data.Conduit.Network                   (appSink, appSource,
-                                                         runGeneralTCPServer,
-                                                         serverSettings,
-                                                         setAfterBind)
-import           Data.Conduit.Serialization.Binary      (ParseError, sinkGet)
-import qualified Data.List                              as List
-import           Data.MessagePack                       (MessagePack, Object,
-                                                         fromObject, toObject)
-import qualified Data.MessagePack.Types.Result          as R
-import           Data.Monoid                            ((<>))
-import qualified Data.Text                              as T
-import           Data.Traversable                       (sequenceA)
-import           Network.Socket                         (SocketOption (ReuseAddr),
-                                                         setSocketOption)
+import           Control.Applicative               (Applicative, pure, (<$>),
+                                                    (<|>))
+import           Control.Monad.Catch               (MonadCatch, MonadThrow,
+                                                    catch, throwM)
+import           Control.Monad.IO.Unlift           (MonadUnliftIO)
+import           Control.Monad.Trans               (MonadIO, MonadTrans, lift,
+                                                    liftIO)
+import           Control.Monad.Trans.Control       (MonadBaseControl)
+import qualified Data.Binary                       as Binary
+import qualified Data.ByteString                   as S
+import           Data.Conduit                      (ConduitT, SealedConduitT,
+                                                    Void, runConduit, ($$+),
+                                                    ($$++), (.|))
+import qualified Data.Conduit.Binary               as CB
+import           Data.Conduit.Network              (appSink, appSource,
+                                                    runGeneralTCPServer,
+                                                    serverSettings,
+                                                    setAfterBind)
+import           Data.Conduit.Serialization.Binary (ParseError, sinkGet)
+import qualified Data.List                         as List
+import           Data.MessagePack                  (MessagePack, Object,
+                                                    fromObject, toObject)
+import qualified Data.MessagePack.Types.Result     as R
+import           Data.Monoid                       ((<>))
+import qualified Data.Text                         as T
+import           Data.Traversable                  (sequenceA)
+import           Network.Socket                    (SocketOption (ReuseAddr),
+                                                    setSocketOption)
 
-import           Network.MessagePack.Interface.Internal (IsReturnType (..),
-                                                         IsReturnTypeIO (..),
-                                                         Returns)
+import           Network.MessagePack.Interface     (IsReturnType (..), Returns,
+                                                    ReturnsM)
 import           Network.MessagePack.Types
 
 
@@ -122,11 +120,11 @@ instance Monad m => IsReturnType m (Returns r) where
   implement _ = return
 
 -- IO Server
-instance MonadIO m => IsReturnTypeIO m (Returns r) where
-  type HaskellTypeIO (Returns r) = IO r
-  type ServerTypeIO m (Returns r) = ServerT m r
+instance MonadIO m => IsReturnType m (ReturnsM IO r) where
+  type HaskellType (ReturnsM IO r) = IO r
+  type ServerType m (ReturnsM IO r) = ServerT m r
 
-  implementIO _ = liftIO
+  implement _ = liftIO
 
 
 processRequests

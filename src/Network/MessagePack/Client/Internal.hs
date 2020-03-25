@@ -6,28 +6,27 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Network.MessagePack.Client.Internal where
 
-import           Control.Applicative                    (Applicative)
-import           Control.Monad                          (when)
-import           Control.Monad.Catch                    (MonadCatch, MonadThrow,
-                                                         throwM)
-import qualified Control.Monad.State.Strict             as CMS
-import qualified Data.Binary                            as Binary
-import qualified Data.ByteString                        as S
-import           Data.Conduit                           (ConduitT,
-                                                         SealedConduitT, Void,
-                                                         runConduit, ($$++),
-                                                         (.|))
-import qualified Data.Conduit.Binary                    as CB
-import           Data.Conduit.Serialization.Binary      (sinkGet)
-import           Data.MessagePack                       (MessagePack (fromObject),
-                                                         Object)
-import qualified Data.MessagePack.Types.Result          as R
-import           Data.Monoid                            ((<>))
-import           Data.Text                              (Text)
-import qualified Data.Text                              as T
+import           Control.Applicative               (Applicative)
+import           Control.Monad                     (when)
+import           Control.Monad.Catch               (MonadCatch, MonadThrow,
+                                                    throwM)
+import qualified Control.Monad.State.Strict        as CMS
+import qualified Data.Binary                       as Binary
+import qualified Data.ByteString                   as S
+import           Data.Conduit                      (ConduitT, SealedConduitT,
+                                                    Void, runConduit, ($$++),
+                                                    (.|))
+import qualified Data.Conduit.Binary               as CB
+import           Data.Conduit.Serialization.Binary (sinkGet)
+import           Data.MessagePack                  (MessagePack (fromObject),
+                                                    Object)
+import qualified Data.MessagePack.Types.Result     as R
+import           Data.Monoid                       ((<>))
+import           Data.Text                         (Text)
+import qualified Data.Text                         as T
 
-import           Network.MessagePack.Interface.Internal (IsClientType (..),
-                                                         Returns)
+import           Network.MessagePack.Interface     (IsClientType (..), Returns,
+                                                    ReturnsM)
 import           Network.MessagePack.Types.Client
 import           Network.MessagePack.Types.Error
 import           Network.MessagePack.Types.Spec
@@ -50,6 +49,9 @@ type Client a = ClientT IO a
 
 instance IsClientType m (Returns r) where
   type ClientType m (Returns r) = ClientT m r
+
+instance IsClientType m (ReturnsM io r) where
+  type ClientType m (ReturnsM io r) = ClientT m r
 
 
 instance (CMS.MonadIO m, MonadThrow m, MessagePack o)

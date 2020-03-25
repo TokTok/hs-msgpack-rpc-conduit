@@ -17,13 +17,13 @@ data MethodVal = MethodVal
   { valName :: !Text
   , valType :: !Text
   }
-  deriving (Show)
+  deriving (Show, Read, Eq)
 
 data MethodDocs = MethodDocs
   { methodArgs :: ![MethodVal]
   , methodRetv :: !MethodVal
   }
-  deriving (Show)
+  deriving (Show, Read, Eq)
 
 -- ^ MessagePack RPC method
 data Method m = Method

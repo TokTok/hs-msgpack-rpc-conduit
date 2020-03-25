@@ -13,9 +13,10 @@ import           Network.Socket                (withSocketsDo)
 import           Network.MessagePack.Client    (Client)
 import qualified Network.MessagePack.Client    as Client
 import           Network.MessagePack.Interface (Doc (..), Interface, Returns,
-                                                call, concrete, interface,
-                                                method, methodIO)
+                                                ReturnsM, call, concrete,
+                                                interface, method)
 import qualified Network.MessagePack.Rpc       as Rpc
+import           Network.MessagePack.Server    (MethodDocs (..), MethodVal (..))
 import qualified Network.MessagePack.Server    as Server
 
 
@@ -34,9 +35,9 @@ addR = Rpc.stubs "add" (Arg "a" $ Arg "b" $ Ret "sum")
 echo :: String -> IO String
 echo s = return $ "***" ++ s ++ "***"
 
-echoI :: Interface (String -> Returns String)
+echoI :: Interface (String -> ReturnsM IO String)
 echoC :: String -> Client String
-(echoI, echoC) = (interface "echo" (Arg "input" $ Ret "output"), call . concrete $ echoI)
+(echoI, echoC) = (interface "echo" (Arg "input" $ RetM "output"), call . concrete $ echoI)
 
 
 helloR :: Rpc.Rpc (String -> Returns String)
@@ -44,9 +45,9 @@ helloR = Rpc.stubs "hello" (Arg "name" $ Ret "hello")
   ("Hello, " ++)
 
 
-helloIOR :: Rpc.RpcIO (String -> Returns String)
-helloIOR = Rpc.stubsIO "helloIO" (Arg "name" $ Ret "hello") $
-  return . ("Hello, " ++)
+helloIOR :: Rpc.Rpc (Int -> String -> ReturnsM IO String)
+helloIOR = Rpc.stubs "helloIO" (Arg "num" $ Arg "name" $ RetM "hello") $
+  \num name -> return $ "Hello, " ++ name ++ " " ++ show num
 
 
 port :: Int
@@ -61,7 +62,7 @@ runTest runC runS = withSocketsDo $
   server runS `race_` do
     threadDelay 1000
     res <- client runC
-    res `shouldBe` (123 + 456, "***hello***")
+    res `shouldBe` (333, "***hello***")
 
 
 spec :: Spec
@@ -86,12 +87,25 @@ spec = do
 
     it "works for IO and non-IO" $ do
       Rpc.docs helloR   `shouldBe` ("hello"  , Arg "name" $ Ret "hello")
-      Rpc.docs helloIOR `shouldBe` ("helloIO", Arg "name" $ Ret "hello")
+      Rpc.docs helloIOR `shouldBe` ("helloIO", Arg "num" $ Arg "name" $ RetM "hello")
 
     it "has working read/show implementations" $ do
       let docs = Rpc.docs addR
       read (show docs) `shouldBe` docs
       show docs `shouldBe` "(\"add\",Arg \"a\" (Arg \"b\" (Ret \"sum\")))"
+
+    it "has type information" $ do
+      let meth = Rpc.method helloIOR
+      let docs = Server.methodDocs meth
+      read (show docs) `shouldBe` docs
+      docs `shouldBe` MethodDocs
+        { methodArgs =
+            [ MethodVal {valName = "num", valType = "Int"}
+            , MethodVal {valName = "name", valType = "String"}
+            ]
+        , methodRetv = MethodVal {valName = "hello", valType = "String"}
+        }
+      Server.methodName meth `shouldBe` "helloIO"
 
     it "can be retrieved from type-erased methods" $ do
       let docs = map Server.methodDocs methods
@@ -112,7 +126,7 @@ spec = do
 methods :: [Server.Method IO]
 methods =
   [ method addI add
-  , methodIO echoI echo
+  , method echoI echo
   , Rpc.method helloR
   , Rpc.method helloIOR
   ]
@@ -127,12 +141,12 @@ client
   -> IO (Int, String)
 client run =
   run "127.0.0.1" port $ do
-    r1 <- addC 123 456
-    liftIO $ r1 `shouldBe` 123 + 456
+    r1 <- addC 111 222
+    liftIO $ r1 `shouldBe` 333
     r2 <- echoC "hello"
     liftIO $ r2 `shouldBe` "***hello***"
     r3 <- Rpc.rpc helloR "iphy"
     liftIO $ r3 `shouldBe` "Hello, iphy"
-    r4 <- Rpc.rpc helloIOR "iphy"
-    liftIO $ r4 `shouldBe` "Hello, iphy"
+    r4 <- Rpc.rpc helloIOR 911 "iphy"
+    liftIO $ r4 `shouldBe` "Hello, iphy 911"
     return (r1, r2)

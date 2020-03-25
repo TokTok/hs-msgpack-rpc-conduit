@@ -4,25 +4,25 @@
 {-# LANGUAGE TypeFamilies          #-}
 module Network.MessagePack.Rpc
   ( I.Returns
+  , I.ReturnsM
   , I.Doc (..)
   , method
   , rpc
   , docs
   , stubs, Rpc, RpcT (local)
-  , stubsIO, RpcIO, RpcIOT (localIO)
   ) where
 
-import           Control.Monad.Catch                    (MonadThrow)
-import           Data.Text                              (Text)
+import           Control.Monad.Catch              (MonadThrow)
+import           Data.Text                        (Text)
 
-import qualified Network.MessagePack.Interface.Internal as I
-import qualified Network.MessagePack.Types.Client       as Client
-import qualified Network.MessagePack.Types.Server       as Server
+import qualified Network.MessagePack.Interface    as I
+import qualified Network.MessagePack.Types.Client as Client
+import qualified Network.MessagePack.Types.Server as Server
 
 -- Import orphan instances for RpcType and IsReturnType.
 -- TODO(SX91): Avoid orphan instances. See issue #7.
-import           Network.MessagePack.Client.Basic       ()
-import           Network.MessagePack.Server.Basic       ()
+import           Network.MessagePack.Client.Basic ()
+import           Network.MessagePack.Server.Basic ()
 
 
 class RpcService rpc where
@@ -73,46 +73,4 @@ stubs n doc f = RpcT c f m i
   where
     c = Client.call n
     m = I.method i f
-    i = I.interface n doc
-
-
---------------------------------------------------------------------------------
---
--- :: IO RPCs
---
---------------------------------------------------------------------------------
-
-type RpcIO f = RpcIOT IO IO f
-
-data RpcIOT mc ms f = RpcIOT
-  { rpcIO    :: !(I.ClientType mc f)
-  , localIO  :: !(I.HaskellTypeIO f)
-  , methodIO :: !(Server.Method ms)
-  , intfIO   :: !(I.Interface f)
-  }
-
-instance RpcService (RpcIOT mc ms f) where
-  type ClientMonad (RpcIOT mc ms f) = mc
-  type ServerMonad (RpcIOT mc ms f) = ms
-  type F (RpcIOT mc ms f) = f
-  rpc    = rpcIO
-  {-# INLINE rpc #-}
-  method = methodIO
-  {-# INLINE method #-}
-  docs r = (Server.methodName $ method r, I.docs $ intfIO r)
-  {-# INLINE docs #-}
-
-
-stubsIO
-  :: ( Client.RpcType (I.ClientType mc f)
-     , Server.MethodType ms (I.ServerTypeIO ms f)
-     , I.IsReturnTypeIO ms f
-     , I.IsDocType f
-     , MonadThrow ms
-     )
-  => Text -> I.Doc f -> I.HaskellTypeIO f -> RpcIOT mc ms f
-stubsIO n doc f = RpcIOT c f m i
-  where
-    c = Client.call n
-    m = I.methodIO i f
     i = I.interface n doc

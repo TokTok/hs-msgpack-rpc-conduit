@@ -39,8 +39,6 @@ library
       Network.MessagePack.Capabilities
       Network.MessagePack.Client.Basic
       Network.MessagePack.Client.Internal
-      Network.MessagePack.Interface.Internal
-      Network.MessagePack.Internal.TypeUtil
       Network.MessagePack.Protocol
       Network.MessagePack.Server.Basic
       Network.MessagePack.Types.Client
