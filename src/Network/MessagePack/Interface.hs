@@ -7,7 +7,20 @@
 {-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE StandaloneDeriving    #-}
 {-# LANGUAGE TypeFamilies          #-}
-module Network.MessagePack.Interface where
+module Network.MessagePack.Interface
+    ( Interface (..)
+    , InterfaceM (..)
+    , IsDocType (..)
+    , IsClientType (..)
+    , IsReturnType (..)
+    , Doc (..)
+    , Returns
+    , ReturnsM
+    , call
+    , concrete
+    , interface
+    , method
+    ) where
 
 import           Control.Monad.Catch              (MonadThrow)
 import           Control.Monad.Trans              (MonadIO)

@@ -75,10 +75,10 @@ import           Data.Conduit.Serialization.Binary (ParseError, sinkGet)
 import qualified Data.List                         as List
 import           Data.MessagePack                  (MessagePack, Object,
                                                     fromObject, toObject)
-import qualified Data.MessagePack.Types.Result     as R
 import           Data.Monoid                       ((<>))
 import qualified Data.Text                         as T
 import           Data.Traversable                  (sequenceA)
+import qualified Network.MessagePack.Types.Result  as R
 import           Network.Socket                    (SocketOption (ReuseAddr),
                                                     setSocketOption)
 

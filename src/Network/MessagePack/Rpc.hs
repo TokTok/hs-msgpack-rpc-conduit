@@ -3,9 +3,9 @@
 {-# LANGUAGE Safe                  #-}
 {-# LANGUAGE TypeFamilies          #-}
 module Network.MessagePack.Rpc
-  ( I.Returns
+  ( I.Doc (..)
+  , I.Returns
   , I.ReturnsM
-  , I.Doc (..)
   , method
   , rpc
   , docs
@@ -33,12 +33,6 @@ class RpcService rpc where
   method :: rpc -> Server.Method (ServerMonad rpc)
   docs   :: rpc -> (Text, I.Doc (F rpc))
 
-
---------------------------------------------------------------------------------
---
--- :: Non-IO RPCs
---
---------------------------------------------------------------------------------
 
 type Rpc f = RpcT IO IO f
 

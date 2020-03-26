@@ -122,6 +122,10 @@ spec = do
           Server.valType retv `shouldNotBe` ""
         ) docs
 
+  describe "methods" $
+    it "can be executed locally" $
+      Rpc.local helloR "world" `shouldBe` "Hello, world"
+
 
 methods :: [Server.Method IO]
 methods =

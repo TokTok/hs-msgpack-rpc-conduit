@@ -20,10 +20,10 @@ import qualified Data.Conduit.Binary               as CB
 import           Data.Conduit.Serialization.Binary (sinkGet)
 import           Data.MessagePack                  (MessagePack (fromObject),
                                                     Object)
-import qualified Data.MessagePack.Types.Result     as R
 import           Data.Monoid                       ((<>))
 import           Data.Text                         (Text)
 import qualified Data.Text                         as T
+import qualified Network.MessagePack.Types.Result  as R
 
 import           Network.MessagePack.Interface     (IsClientType (..), Returns,
                                                     ReturnsM)

@@ -1,4 +1,4 @@
-name:                 network-msgpack-rpc
+name:                 msgpack-rpc-conduit
 version:              0.0.6
 synopsis:             A MessagePack-RPC Implementation
 homepage:             http://msgpack.org/
@@ -20,7 +20,7 @@ description:
 
 source-repository head
   type:             git
-  location:         https://github.com/TokTok/msgpack-haskell.git
+  location:         https://github.com/TokTok/hs-msgpack-rpc-conduit.git
 
 library
   default-language: Haskell2010
@@ -43,6 +43,7 @@ library
       Network.MessagePack.Server.Basic
       Network.MessagePack.Types.Client
       Network.MessagePack.Types.Error
+      Network.MessagePack.Types.Result
       Network.MessagePack.Types.Server
       Network.MessagePack.Types.Spec
   build-depends:
@@ -54,13 +55,12 @@ library
     , conduit-extra
     , data-default-class
     , data-default-instances-base
-    , data-msgpack                      >= 0.0.11
-    , data-msgpack-types                >= 0.0.1
     , exceptions
     , monad-control
+    , msgpack-binary                    >= 0.0.11
+    , msgpack-types                     >= 0.0.1
     , mtl
     , network                           < 3
-    , tagged
     , text
     , unliftio-core
 
@@ -78,6 +78,6 @@ test-suite testsuite
     , async
     , bytestring
     , hspec
+    , msgpack-rpc-conduit
     , mtl
     , network                           < 3
-    , network-msgpack-rpc
