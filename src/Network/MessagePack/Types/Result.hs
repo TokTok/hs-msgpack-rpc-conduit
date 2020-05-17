@@ -30,13 +30,12 @@ instance Alternative Result where
     _            <|> r = r
 
 instance Monad Result where
-    return = Success
-    fail = Failure
-
     Success x   >>= f = f x
     Failure msg >>= _ = Failure msg
 
+    return = Success
+
 #if (MIN_VERSION_base(4,13,0))
 instance MonadFail Result where
-    fail = Failure
 #endif
+    fail = Failure
