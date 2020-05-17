@@ -1,0 +1,5 @@
+---
+restylers:
+  - prettier-markdown:
+      enabled: false
+  - "*"

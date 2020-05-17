@@ -1,26 +1,11 @@
-MessagePack for Haskell
-=======================
+# MessagePack for Haskell
 
-This is an implementation of msgpack for Haskell.
-
-It containes:
-
-* Serializer/Deserializer
-* RPC
-
-# Install
-
-Execute following instructions:
-
-~~~ {.bash}
-$ cabal update
-$ cabal install data-msgpack
-$ cabal install network-msgpack-rpc
-~~~
+This is an implementation of a msgpack RPC protocol for Haskell. It uses conduit
+to establish TCP connections and send messages over this connection. Both client
+and server are provided.
 
 # Document
 
-There are Haddoc documents on Hackage Database.
+There are Haddock documents on Hackage Database.
 
-* <http://hackage.haskell.org/package/data-msgpack>
-* <http://hackage.haskell.org/package/network-msgpack-rpc>
+-   <http://hackage.haskell.org/package/msgpack-rpc-conduit>
