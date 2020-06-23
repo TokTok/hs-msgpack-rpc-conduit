@@ -59,7 +59,7 @@ library
     , msgpack-binary                    >= 0.0.11
     , msgpack-types                     >= 0.0.1
     , mtl
-    , network                           < 3
+    , network                           < 3.1
     , text
     , unliftio-core
 
@@ -79,4 +79,4 @@ test-suite testsuite
     , hspec
     , msgpack-rpc-conduit
     , mtl
-    , network                           < 3
+    , network                           < 3.1
