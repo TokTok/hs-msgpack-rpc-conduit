@@ -22,7 +22,6 @@ haskell_library(
         hazel_library("conduit"),
         hazel_library("conduit-extra"),
         hazel_library("data-default-class"),
-        hazel_library("data-default-instances-base"),
         hazel_library("exceptions"),
         hazel_library("monad-control"),
         hazel_library("mtl"),

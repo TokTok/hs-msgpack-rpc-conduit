@@ -20,7 +20,6 @@ import           Control.Monad                       (when)
 import           Control.Monad.Catch                 (catch)
 import qualified Data.ByteString                     as S
 import           Data.Default.Class                  (Default (..))
-import           Data.Default.Instances.Base         ()
 
 import           Network.MessagePack.Capabilities    (ClientCapability (..),
                                                       ServerCapability (..))

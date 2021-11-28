@@ -54,7 +54,6 @@ library
     , conduit
     , conduit-extra
     , data-default-class
-    , data-default-instances-base
     , exceptions
     , monad-control
     , msgpack-binary                    >= 0.0.11

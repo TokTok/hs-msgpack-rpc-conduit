@@ -88,7 +88,7 @@ import           Network.MessagePack.Types
 
 
 newtype ServerT m a = ServerT { runServerT :: m a }
-  deriving (Functor, Applicative, Monad, MonadIO)
+  deriving (Functor, Applicative, Monad, MonadIO, MonadFail)
 
 
 instance MonadTrans ServerT where
