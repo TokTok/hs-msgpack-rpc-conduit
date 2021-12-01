@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE StrictData         #-}
 module Network.MessagePack.Types.Error
   ( RpcError (..)
   , ServerError (..)
@@ -12,9 +13,9 @@ import           Data.Typeable     (Typeable)
 
 -- | RPC error type
 data RpcError
-  = RemoteError !Object           -- ^ Server error
-  | ResultTypeError !Text !Object -- ^ Result type mismatch
-  | ProtocolError !Text           -- ^ Protocol error
+  = RemoteError Object          -- ^ Server error
+  | ResultTypeError Text Object -- ^ Result type mismatch
+  | ProtocolError Text          -- ^ Protocol error
   deriving (Show, Eq, Ord, Typeable)
 
 instance Exception RpcError

@@ -6,6 +6,7 @@
 {-# LANGUAGE Safe                  #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE StandaloneDeriving    #-}
+{-# LANGUAGE StrictData            #-}
 {-# LANGUAGE TypeFamilies          #-}
 module Network.MessagePack.Interface
     ( Interface (..)
@@ -36,8 +37,8 @@ import qualified Network.MessagePack.Types.Server as Server
 
 
 data Interface f = Interface
-  { name :: !Text
-  , docs :: !(Doc f)
+  { name :: Text
+  , docs :: Doc f
   }
 
 

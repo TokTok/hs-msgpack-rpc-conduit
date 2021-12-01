@@ -1,5 +1,6 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE Safe                  #-}
+{-# LANGUAGE StrictData            #-}
 module Network.MessagePack.Types.Server
   ( MethodVal (..)
   , MethodDocs (..)
@@ -14,21 +15,21 @@ import           Data.Text        (Text)
 
 
 data MethodVal = MethodVal
-  { valName :: !Text
-  , valType :: !Text
+  { valName :: Text
+  , valType :: Text
   }
   deriving (Show, Read, Eq)
 
 data MethodDocs = MethodDocs
-  { methodArgs :: ![MethodVal]
-  , methodRetv :: !MethodVal
+  { methodArgs :: [MethodVal]
+  , methodRetv :: MethodVal
   }
   deriving (Show, Read, Eq)
 
 -- ^ MessagePack RPC method
 data Method m = Method
-  { methodName :: !Text
-  , methodDocs :: !MethodDocs
+  { methodName :: Text
+  , methodDocs :: MethodDocs
   , methodBody :: [Object] -> m Object
   }
 
