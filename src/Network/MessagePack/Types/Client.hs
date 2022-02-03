@@ -1,10 +1,11 @@
+{-# LANGUAGE Safe #-}
 module Network.MessagePack.Types.Client
   ( RpcType (..)
   , call
   ) where
 
-import           Data.MessagePack (MessagePack (toObject), Object)
-import           Data.Text        (Text)
+import           Data.MessagePack.Types (MessagePack (toObject), Object)
+import           Data.Text              (Text)
 
 
 class RpcType r where
