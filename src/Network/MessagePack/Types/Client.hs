@@ -4,7 +4,7 @@ module Network.MessagePack.Types.Client
   , call
   ) where
 
-import safe      Data.MessagePack.Types (MessagePack (toObject), Object)
+import safe           Data.MessagePack.Types (MessagePack (toObject), Object)
 import           Data.Text              (Text)
 
 
