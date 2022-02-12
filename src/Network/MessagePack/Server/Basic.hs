@@ -62,6 +62,7 @@ import           Control.Monad.IO.Unlift           (MonadUnliftIO)
 import           Control.Monad.Trans               (MonadIO, MonadTrans, lift,
                                                     liftIO)
 import           Control.Monad.Trans.Control       (MonadBaseControl)
+import           Control.Monad.Validate            (runValidate)
 import qualified Data.Binary                       as Binary
 import qualified Data.ByteString                   as S
 import           Data.Conduit                      (ConduitT, SealedConduitT,
@@ -75,7 +76,8 @@ import           Data.Conduit.Network              (appSink, appSource,
 import           Data.Conduit.Serialization.Binary (ParseError, sinkGet)
 import qualified Data.List                         as List
 import           Data.MessagePack                  (MessagePack, Object,
-                                                    fromObject, toObject)
+                                                    defaultConfig, fromObject,
+                                                    fromObjectWith, toObject)
 import           Data.Monoid                       ((<>))
 import qualified Data.Text                         as T
 import           Data.Traversable                  (sequenceA)
@@ -102,13 +104,13 @@ type Server = ServerT IO
 
 instance (MonadThrow m, MessagePack o, MethodType m r) => MethodType m (o -> r) where
   toBody n f (x : xs) =
-    case fromObject x of
-      Nothing -> throwM $ ServerError "argument type error"
-      Just r  -> toBody n (f r) xs
+    case runValidate . fromObjectWith defaultConfig $ x of
+      Left err -> throwM $ ServerError $ "argument type error: " <> T.pack (show err)
+      Right ok -> toBody n (f ok) xs
   toBody _ _ [] = error "messagepack-rpc methodtype instance toBody failed"
 
 instance (Functor m, MonadThrow m, MessagePack o) => MethodType m (ServerT m o) where
-  toBody _ m [] = toObject <$> runServerT m
+  toBody _ m [] = toObject defaultConfig <$> runServerT m
   toBody n _ ls =
     throwM $ ServerError $
       "invalid arguments for method '" <> n <> "': " <> T.pack (show ls)
@@ -139,11 +141,11 @@ processRequests methods rsrc sink = do
     rsrc $$++ do
       obj <- sinkGet Binary.get
       case unpackRequest obj of
-        Nothing ->
-          throwM $ ServerError "invalid request"
-        Just req@(_, msgid, _, _) ->
+        Left err ->
+          throwM . ServerError . T.pack . show $ err
+        Right req@(_, msgid, _, _) ->
           lift $ getResponse methods req `catch` \(ServerError err) ->
-            return (1, msgid, toObject err, toObject ())
+            return (1, msgid, toObject defaultConfig err, toObject defaultConfig ())
 
   _ <- runConduit $ CB.sourceLbs (packResponse res) .| sink
   processRequests methods rsrc' sink
@@ -157,11 +159,11 @@ getResponse
 getResponse methods (0, msgid, mth, args) =
   process <$> callMethod methods mth args
   where
-    process (R.Failure err) = (1, msgid, toObject err, toObject ())
-    process (R.Success ok ) = (1, msgid, toObject (), ok)
+    process (R.Failure err) = (1, msgid, toObject defaultConfig err, toObject defaultConfig ())
+    process (R.Success ok ) = (1, msgid, toObject defaultConfig (), ok)
 
 getResponse _ (rtype, msgid, _, _) =
-  pure (1, msgid, toObject ["request type is not 0, got " <> T.pack (show rtype)], toObject ())
+  pure (1, msgid, toObject defaultConfig ["request type is not 0, got " <> T.pack (show rtype)], toObject defaultConfig ())
 
 
 callMethod

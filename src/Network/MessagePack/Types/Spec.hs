@@ -7,9 +7,11 @@ module Network.MessagePack.Types.Spec
   , unpackResponse
   ) where
 
-import qualified Data.ByteString.Lazy as L
-import qualified Data.List            as List
-import           Data.MessagePack     (MessagePack, Object, fromObject, pack)
+import           Control.Monad.Validate (runValidate)
+import qualified Data.ByteString.Lazy   as L
+import qualified Data.List              as List
+import           Data.MessagePack       (DecodeError, MessagePack, Object,
+                                         defaultConfig, fromObjectWith, pack)
 
 type Request ix = (Int, Int, ix, [Object])
 type Response   = (Int, Int, Object, Object)
@@ -25,8 +27,8 @@ packRequest mths req@(rtype, msgid, mth, obj) =
 packResponse :: Response -> L.ByteString
 packResponse = pack
 
-unpackResponse :: Object -> Maybe Response
-unpackResponse = fromObject
+unpackResponse :: Object -> Either DecodeError Response
+unpackResponse = runValidate . fromObjectWith defaultConfig
 
-unpackRequest :: MessagePack ix => Object -> Maybe (Request ix)
-unpackRequest = fromObject
+unpackRequest :: MessagePack ix => Object -> Either DecodeError (Request ix)
+unpackRequest = runValidate . fromObjectWith defaultConfig

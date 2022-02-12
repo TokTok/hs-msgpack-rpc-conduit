@@ -4,7 +4,8 @@ module Network.MessagePack.Types.Client
   , call
   ) where
 
-import           Data.MessagePack.Types (MessagePack (toObject), Object)
+import           Data.MessagePack.Types (MessagePack, Object, defaultConfig,
+                                         toObject)
 import           Data.Text              (Text)
 
 
@@ -13,7 +14,7 @@ class RpcType r where
 
 
 instance (MessagePack o, RpcType r) => RpcType (o -> r) where
-  rpcc name args arg = rpcc name (toObject arg : args)
+  rpcc name args arg = rpcc name (toObject defaultConfig arg : args)
   {-# INLINE rpcc #-}
 
 
