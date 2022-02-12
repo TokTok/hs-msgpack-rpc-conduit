@@ -27,6 +27,7 @@ haskell_library(
         hazel_library("data-default-class"),
         hazel_library("exceptions"),
         hazel_library("monad-control"),
+        hazel_library("monad-validate"),
         hazel_library("mtl"),
         hazel_library("network"),
         hazel_library("text"),

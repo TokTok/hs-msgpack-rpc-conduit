@@ -56,10 +56,11 @@ library
     , data-default-class
     , exceptions
     , monad-control
-    , msgpack-binary                    >= 0.0.11
-    , msgpack-types                     >= 0.0.1
+    , monad-validate
+    , msgpack-binary            >= 0.0.11
+    , msgpack-types             >= 0.2 && < 0.3
     , mtl
-    , network                           < 4
+    , network                   < 4
     , text
     , unliftio-core
 
@@ -79,4 +80,4 @@ test-suite testsuite
     , hspec
     , msgpack-rpc-conduit
     , mtl
-    , network                           < 4
+    , network

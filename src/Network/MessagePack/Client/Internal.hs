@@ -12,6 +12,7 @@ import           Control.Monad                     (when)
 import           Control.Monad.Catch               (MonadCatch, MonadThrow,
                                                     throwM)
 import qualified Control.Monad.State.Strict        as CMS
+import           Control.Monad.Validate            (runValidate)
 import qualified Data.Binary                       as Binary
 import qualified Data.ByteString                   as S
 import           Data.Conduit                      (ConduitT, SealedConduitT,
@@ -19,8 +20,9 @@ import           Data.Conduit                      (ConduitT, SealedConduitT,
                                                     (.|))
 import qualified Data.Conduit.Binary               as CB
 import           Data.Conduit.Serialization.Binary (sinkGet)
-import           Data.MessagePack                  (MessagePack (fromObject),
-                                                    Object)
+import           Data.MessagePack                  (MessagePack, Object,
+                                                    defaultConfig, fromObject,
+                                                    fromObjectWith)
 import           Data.Monoid                       ((<>))
 import           Data.Text                         (Text)
 import qualified Data.Text                         as T
@@ -59,11 +61,11 @@ instance (CMS.MonadIO m, MonadThrow m, MessagePack o)
     => RpcType (ClientT m o) where
   rpcc name args = do
     res <- rpcCall name (reverse args)
-    case fromObject res of
-      R.Success ok  ->
+    case runValidate $ fromObjectWith defaultConfig res of
+      Right ok  ->
         return ok
-      R.Failure msg ->
-        throwM $ ResultTypeError (T.pack msg) res
+      Left err ->
+        throwM $ ResultTypeError (T.pack $ show err) res
 
 
 rpcCall :: (MonadThrow m, CMS.MonadIO m) => Text -> [Object] -> ClientT m Object
@@ -82,8 +84,8 @@ rpcCall methodName args = ClientT $ do
     }
 
   case unpackResponse res of
-    Nothing -> throwM $ ProtocolError "invalid response data"
-    Just (rtype, rmsgid, rerror, rresult) -> do
+    Left err -> throwM $ ProtocolError $ "invalid response data: " <> T.pack (show err)
+    Right (rtype, rmsgid, rerror, rresult) -> do
       when (rtype /= 1) $
         throwM $ ProtocolError $
           "invalid response type (expect 1, but got " <> T.pack (show rtype) <> "): " <> T.pack (show res)
