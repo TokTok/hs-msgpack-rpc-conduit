@@ -58,7 +58,7 @@ library
     , monad-control
     , monad-validate
     , msgpack-binary            >= 0.0.11
-    , msgpack-types             >= 0.2 && < 0.3
+    , msgpack-types             >= 0.2 && < 0.4
     , mtl
     , network                   < 4
     , text

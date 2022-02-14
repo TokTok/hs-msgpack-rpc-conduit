@@ -13,3 +13,5 @@ branches:
         contexts:
           - "bazel-opt"
           - "build / stack"
+          - "checks / check-release"
+          - "common / buildifier"
