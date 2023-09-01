@@ -1,16 +1,16 @@
-name:                 msgpack-rpc-conduit
-version:              0.0.7
-synopsis:             A MessagePack-RPC Implementation
-homepage:             http://msgpack.org/
-license:              BSD3
-license-file:         LICENSE
-author:               Hideyuki Tanaka
-maintainer:           Iphigenia Df <iphydf@gmail.com>
-copyright:            Copyright (c) 2009-2016, Hideyuki Tanaka
-category:             Data
-stability:            Experimental
-cabal-version:        >= 1.10
-build-type:           Simple
+name:          msgpack-rpc-conduit
+version:       0.0.8
+synopsis:      A MessagePack-RPC Implementation
+homepage:      http://msgpack.org/
+license:       BSD3
+license-file:  LICENSE
+author:        Hideyuki Tanaka
+maintainer:    Iphigenia Df <iphydf@gmail.com>
+copyright:     Copyright (c) 2009-2016, Hideyuki Tanaka
+category:      Data
+stability:     Experimental
+cabal-version: >=1.10
+build-type:    Simple
 description:
   A MessagePack-RPC Implementation <http://msgpack.org/>
   .
@@ -19,35 +19,34 @@ description:
   bugfixes and is actively being developed.
 
 source-repository head
-  type:             git
-  location:         https://github.com/TokTok/hs-msgpack-rpc-conduit.git
+  type:     git
+  location: https://github.com/TokTok/hs-msgpack-rpc-conduit.git
 
 library
   default-language: Haskell2010
-  ghc-options:
-      -Wall
-      -Wno-unused-imports
-  hs-source-dirs:
-      src
+  ghc-options:      -Wall -Wno-unused-imports
+  hs-source-dirs:   src
   exposed-modules:
-      Network.MessagePack.Client
-      Network.MessagePack.Interface
-      Network.MessagePack.Rpc
-      Network.MessagePack.Server
-      Network.MessagePack.Types
+    Network.MessagePack.Client
+    Network.MessagePack.Interface
+    Network.MessagePack.Rpc
+    Network.MessagePack.Server
+    Network.MessagePack.Types
+
   other-modules:
-      Network.MessagePack.Capabilities
-      Network.MessagePack.Client.Basic
-      Network.MessagePack.Client.Internal
-      Network.MessagePack.Protocol
-      Network.MessagePack.Server.Basic
-      Network.MessagePack.Types.Client
-      Network.MessagePack.Types.Error
-      Network.MessagePack.Types.Result
-      Network.MessagePack.Types.Server
-      Network.MessagePack.Types.Spec
+    Network.MessagePack.Capabilities
+    Network.MessagePack.Client.Basic
+    Network.MessagePack.Client.Internal
+    Network.MessagePack.Protocol
+    Network.MessagePack.Server.Basic
+    Network.MessagePack.Types.Client
+    Network.MessagePack.Types.Error
+    Network.MessagePack.Types.Result
+    Network.MessagePack.Types.Server
+    Network.MessagePack.Types.Spec
+
   build-depends:
-      base < 5
+      base                <5
     , binary
     , binary-conduit
     , bytestring
@@ -57,25 +56,23 @@ library
     , exceptions
     , monad-control
     , monad-validate
-    , msgpack-binary            >= 0.0.11
-    , msgpack-types             >= 0.2 && < 0.4
+    , msgpack-binary      >=0.0.11
+    , msgpack-types       >=0.2    && <0.4
     , mtl
-    , network                   < 4
+    , network             <4
     , text
     , unliftio-core
 
 test-suite testsuite
-  type: exitcode-stdio-1.0
+  type:             exitcode-stdio-1.0
   default-language: Haskell2010
-  ghc-options:
-      -Wall
-  hs-source-dirs: test
-  main-is: testsuite.hs
-  other-modules:
-      Network.MessagePack.ServerSpec
+  ghc-options:      -Wall
+  hs-source-dirs:   test
+  main-is:          testsuite.hs
+  other-modules:    Network.MessagePack.ServerSpec
   build-depends:
-      base < 5
-    , async
+      async
+    , base                 <5
     , bytestring
     , hspec
     , msgpack-rpc-conduit
