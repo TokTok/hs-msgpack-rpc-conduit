@@ -25,6 +25,7 @@ module Network.MessagePack.Interface
 
 import           Control.Monad.Catch              (MonadThrow)
 import           Control.Monad.Trans              (MonadIO)
+import           Data.Kind                        (Type)
 import           Data.Text                        (Text)
 import qualified Data.Text                        as Text
 import           Data.Typeable                    (Typeable)
@@ -42,7 +43,7 @@ data Interface f = Interface
   }
 
 
-newtype InterfaceM (m :: * -> *) f = InterfaceM
+newtype InterfaceM (m :: Type -> Type) f = InterfaceM
   { nameM :: Text
   }
 
@@ -74,7 +75,7 @@ instance Typeable r => IsDocType (Returns r) where
   flatDoc (Ret retName) =
     MethodDocs [] (MethodVal retName (typeName (undefined :: r)))
 
-data ReturnsM (m :: * -> *) r
+data ReturnsM (m :: Type -> Type) r
 
 instance Typeable r => IsDocType (ReturnsM m r) where
   data Doc (ReturnsM m r) = RetM Text
@@ -105,7 +106,7 @@ typeName = Text.replace "[Char]" "String" . Text.pack . show . Typeable.typeOf
 --------------------------------------------------------------------------------
 
 
-class IsClientType (m :: * -> *) f where
+class IsClientType (m :: Type -> Type) f where
   type ClientType m f
 
 instance IsClientType m r => IsClientType m (o -> r) where
@@ -123,7 +124,7 @@ call = Client.call . nameM
 --------------------------------------------------------------------------------
 
 
-class IsReturnType (m :: * -> *) f where
+class IsReturnType (m :: Type -> Type) f where
   type HaskellType f
   type ServerType m f
 

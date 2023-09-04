@@ -14,6 +14,7 @@ module Network.MessagePack.Rpc
   ) where
 
 import           Control.Monad.Catch              (MonadThrow)
+import           Data.Kind                        (Type)
 import           Data.Text                        (Text)
 
 import qualified Network.MessagePack.Interface    as I
@@ -27,8 +28,8 @@ import           Network.MessagePack.Server.Basic ()
 
 
 class RpcService rpc where
-  type ClientMonad rpc :: * -> *
-  type ServerMonad rpc :: * -> *
+  type ClientMonad rpc :: Type -> Type
+  type ServerMonad rpc :: Type -> Type
   type F rpc
   rpc    :: rpc -> I.ClientType (ClientMonad rpc) (F rpc)
   method :: rpc -> Server.Method (ServerMonad rpc)
