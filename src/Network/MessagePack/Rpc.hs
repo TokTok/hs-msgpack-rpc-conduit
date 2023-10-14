@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE Safe                  #-}
+{-# LANGUAGE RankNTypes            #-}
 {-# LANGUAGE StrictData            #-}
 {-# LANGUAGE TypeFamilies          #-}
 module Network.MessagePack.Rpc
@@ -45,7 +45,7 @@ data RpcT mc ms f = RpcT
   , intfPure   :: !(I.Interface f)
   }
 
-instance RpcService (RpcT mc ms f) where
+instance forall mc ms (f :: Type). RpcService (RpcT mc ms f) where
   type ClientMonad (RpcT mc ms f) = mc
   type ServerMonad (RpcT mc ms f) = ms
   type F (RpcT mc ms f) = f

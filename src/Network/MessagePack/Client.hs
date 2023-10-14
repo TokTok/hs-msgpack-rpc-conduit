@@ -1,5 +1,4 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE Trustworthy         #-}
 module Network.MessagePack.Client (
   -- * MessagePack Client type
     Basic.Client

@@ -3,7 +3,6 @@
 {-# LANGUAGE DeriveFoldable    #-}
 {-# LANGUAGE DeriveFunctor     #-}
 {-# LANGUAGE DeriveTraversable #-}
-{-# LANGUAGE Safe              #-}
 {-# LANGUAGE StrictData        #-}
 module Network.MessagePack.Types.Result
     ( Result (..)

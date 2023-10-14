@@ -5,9 +5,8 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE ScopedTypeVariables        #-}
 {-# LANGUAGE StrictData                 #-}
-{-# LANGUAGE Trustworthy                #-}
 {-# LANGUAGE TypeFamilies               #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 
 -------------------------------------------------------------------
 -- |
@@ -74,6 +73,7 @@ import           Data.Conduit.Network              (appSink, appSource,
                                                     serverSettings,
                                                     setAfterBind)
 import           Data.Conduit.Serialization.Binary (ParseError, sinkGet)
+import           Data.Kind                         (Type)
 import qualified Data.List                         as List
 import           Data.MessagePack                  (MessagePack, Object,
                                                     defaultConfig, fromObject,
@@ -116,14 +116,14 @@ instance (Functor m, MonadThrow m, MessagePack o) => MethodType m (ServerT m o) 
       "invalid arguments for method '" <> n <> "': " <> T.pack (show ls)
 
 -- Pure server
-instance Monad m => IsReturnType m (Returns r) where
+instance forall m (r :: Type). Monad m => IsReturnType m (Returns r) where
   type HaskellType (Returns r) = r
   type ServerType m (Returns r) = ServerT m r
 
   implement _ = return
 
 -- IO Server
-instance MonadIO m => IsReturnType m (ReturnsM IO r) where
+instance forall m (r :: Type). MonadIO m => IsReturnType m (ReturnsM IO r) where
   type HaskellType (ReturnsM IO r) = IO r
   type ServerType m (ReturnsM IO r) = ServerT m r
 

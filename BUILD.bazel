@@ -1,4 +1,3 @@
-load("@ai_formation_hazel//tools:mangling.bzl", "hazel_library")
 load("@rules_haskell//haskell:defs.bzl", "haskell_library")
 load("//third_party/haskell/hspec-discover:build_defs.bzl", "hspec_test")
 load("//tools/project:build_defs.bzl", "project")
@@ -18,20 +17,20 @@ haskell_library(
     deps = [
         "//hs-msgpack-binary",
         "//hs-msgpack-types",
-        hazel_library("base"),
-        hazel_library("binary"),
-        hazel_library("binary-conduit"),
-        hazel_library("bytestring"),
-        hazel_library("conduit"),
-        hazel_library("conduit-extra"),
-        hazel_library("data-default-class"),
-        hazel_library("exceptions"),
-        hazel_library("monad-control"),
-        hazel_library("monad-validate"),
-        hazel_library("mtl"),
-        hazel_library("network"),
-        hazel_library("text"),
-        hazel_library("unliftio-core"),
+        "//third_party/haskell:base",
+        "//third_party/haskell:binary",
+        "//third_party/haskell:binary-conduit",
+        "//third_party/haskell:bytestring",
+        "//third_party/haskell:conduit",
+        "//third_party/haskell:conduit-extra",
+        "//third_party/haskell:data-default-class",
+        "//third_party/haskell:exceptions",
+        "//third_party/haskell:monad-control",
+        "//third_party/haskell:monad-validate",
+        "//third_party/haskell:mtl",
+        "//third_party/haskell:network",
+        "//third_party/haskell:text",
+        "//third_party/haskell:unliftio-core",
     ],
 )
 
@@ -41,11 +40,11 @@ hspec_test(
     compiler_flags = ["-Wno-unused-imports"],
     deps = [
         ":hs-msgpack-rpc-conduit",
-        hazel_library("async"),
-        hazel_library("base"),
-        hazel_library("bytestring"),
-        hazel_library("hspec"),
-        hazel_library("mtl"),
-        hazel_library("network"),
+        "//third_party/haskell:async",
+        "//third_party/haskell:base",
+        "//third_party/haskell:bytestring",
+        "//third_party/haskell:hspec",
+        "//third_party/haskell:mtl",
+        "//third_party/haskell:network",
     ],
 )

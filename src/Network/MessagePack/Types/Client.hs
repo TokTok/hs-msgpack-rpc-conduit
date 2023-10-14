@@ -1,4 +1,3 @@
-{-# LANGUAGE Safe #-}
 module Network.MessagePack.Types.Client
   ( RpcType (..)
   , call

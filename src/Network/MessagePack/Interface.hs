@@ -3,7 +3,6 @@
 {-# LANGUAGE InstanceSigs          #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings     #-}
-{-# LANGUAGE Safe                  #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE StandaloneDeriving    #-}
 {-# LANGUAGE StrictData            #-}
@@ -69,7 +68,7 @@ class IsDocType f where
 
 data Returns r
 
-instance Typeable r => IsDocType (Returns r) where
+instance Typeable (r :: Type) => IsDocType (Returns r) where
   data Doc (Returns r) = Ret Text
     deriving (Eq, Read, Show)
   flatDoc (Ret retName) =
@@ -77,7 +76,7 @@ instance Typeable r => IsDocType (Returns r) where
 
 data ReturnsM (m :: Type -> Type) r
 
-instance Typeable r => IsDocType (ReturnsM m r) where
+instance Typeable (r :: Type) => IsDocType (ReturnsM m r) where
   data Doc (ReturnsM m r) = RetM Text
     deriving (Eq, Read, Show)
   flatDoc (RetM retName) =

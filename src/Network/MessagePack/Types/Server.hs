@@ -1,5 +1,4 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE Safe                  #-}
 {-# LANGUAGE StrictData            #-}
 module Network.MessagePack.Types.Server
   ( MethodVal (..)

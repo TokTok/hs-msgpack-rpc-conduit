@@ -2,6 +2,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
 {-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE RankNTypes                 #-}
 {-# LANGUAGE StrictData                 #-}
 {-# LANGUAGE TypeFamilies               #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
@@ -20,6 +21,7 @@ import           Data.Conduit                      (ConduitT, SealedConduitT,
                                                     (.|))
 import qualified Data.Conduit.Binary               as CB
 import           Data.Conduit.Serialization.Binary (sinkGet)
+import           Data.Kind                         (Type)
 import           Data.MessagePack                  (MessagePack, Object,
                                                     defaultConfig, fromObject,
                                                     fromObjectWith)
@@ -50,10 +52,10 @@ newtype ClientT m a
 
 type Client a = ClientT IO a
 
-instance IsClientType m (Returns r) where
+instance forall m (r :: Type). IsClientType m (Returns r) where
   type ClientType m (Returns r) = ClientT m r
 
-instance IsClientType m (ReturnsM io r) where
+instance forall m io (r :: Type). IsClientType m (ReturnsM io r) where
   type ClientType m (ReturnsM io r) = ClientT m r
 
 
