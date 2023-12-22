@@ -8,7 +8,6 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Network.MessagePack.Client.Internal where
 
-import           Control.Applicative               (Applicative)
 import           Control.Monad                     (when)
 import           Control.Monad.Catch               (MonadCatch, MonadThrow,
                                                     throwM)
@@ -25,10 +24,8 @@ import           Data.Kind                         (Type)
 import           Data.MessagePack                  (MessagePack, Object,
                                                     defaultConfig, fromObject,
                                                     fromObjectWith)
-import           Data.Monoid                       ((<>))
 import           Data.Text                         (Text)
 import qualified Data.Text                         as T
-import qualified Network.MessagePack.Types.Result  as R
 
 import           Network.MessagePack.Interface     (IsClientType (..), Returns,
                                                     ReturnsM)

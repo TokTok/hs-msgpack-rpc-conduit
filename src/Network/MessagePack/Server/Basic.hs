@@ -53,8 +53,7 @@ module Network.MessagePack.Server.Basic (
   , serve
   ) where
 
-import           Control.Applicative               (Applicative, pure, (<$>),
-                                                    (<|>))
+import           Control.Applicative               ((<|>))
 import           Control.Monad.Catch               (MonadCatch, MonadThrow,
                                                     catch, throwM)
 import           Control.Monad.IO.Unlift           (MonadUnliftIO)
@@ -78,9 +77,7 @@ import qualified Data.List                         as List
 import           Data.MessagePack                  (MessagePack, Object,
                                                     defaultConfig, fromObject,
                                                     fromObjectWith, toObject)
-import           Data.Monoid                       ((<>))
 import qualified Data.Text                         as T
-import           Data.Traversable                  (sequenceA)
 import qualified Network.MessagePack.Types.Result  as R
 import           Network.Socket                    (SocketOption (ReuseAddr),
                                                     setSocketOption)

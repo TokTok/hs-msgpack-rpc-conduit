@@ -8,10 +8,7 @@ module Network.MessagePack.Types.Result
     ( Result (..)
     ) where
 
-import           Control.Applicative (Alternative (..), Applicative (..), (<$>),
-                                      (<*>))
-import           Data.Foldable       (Foldable)
-import           Data.Traversable    (Traversable)
+import           Control.Applicative (Alternative (..))
 
 data Result a
     = Success a

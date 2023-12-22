@@ -23,7 +23,6 @@ module Network.MessagePack.Interface
     ) where
 
 import           Control.Monad.Catch              (MonadThrow)
-import           Control.Monad.Trans              (MonadIO)
 import           Data.Kind                        (Type)
 import           Data.Text                        (Text)
 import qualified Data.Text                        as Text

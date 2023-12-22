@@ -14,7 +14,6 @@ module Network.MessagePack.Client (
   , Basic.RpcType
   ) where
 
-import           Control.Applicative                 (Applicative, pure)
 import           Control.Monad                       (when)
 import           Control.Monad.Catch                 (catch)
 import qualified Data.ByteString                     as S

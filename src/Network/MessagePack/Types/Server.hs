@@ -8,7 +8,6 @@ module Network.MessagePack.Types.Server
   , method
   ) where
 
-import           Control.Monad    (Monad)
 import           Data.MessagePack (Object)
 import           Data.Text        (Text)
 

@@ -12,7 +12,6 @@ module Network.MessagePack.Protocol
   , protocolMethods
   ) where
 
-import           Control.Applicative              (Applicative, pure)
 import           Control.Monad.Catch              (MonadCatch)
 import           Control.Monad.Trans              (MonadIO)
 import           Control.Monad.Trans.Control      (MonadBaseControl)
