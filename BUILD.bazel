@@ -11,6 +11,7 @@ haskell_library(
     name = "hs-msgpack-rpc-conduit",
     srcs = glob(["src/**/*.*hs"]),
     src_strip_prefix = "src",
+    tags = ["no-cross"],
     version = "0.0.8",
     visibility = ["//visibility:public"],
     deps = [
